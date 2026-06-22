@@ -17,9 +17,12 @@ internal static class SettingsStore
     public const int DefaultVolumePercent = 60;
     private const double DefaultSize = 320;
     private const double Margin = 24;
+    private static readonly string LocalAppData =
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
     private static readonly string DirectoryPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Pomodoro");
+        LocalAppData, "AutoPomodoro");
     private static readonly string FilePath = Path.Combine(DirectoryPath, "settings.json");
+    private static readonly string LegacyFilePath = Path.Combine(LocalAppData, "Pomodoro", "settings.json");
 
     public static AppSettings Defaults() =>
         new(DefaultGeometry(), DefaultVolumePercent, PomodoroMode.Standard25_5);
@@ -28,9 +31,10 @@ internal static class SettingsStore
     {
         try
         {
-            if (File.Exists(FilePath))
+            var sourcePath = File.Exists(FilePath) ? FilePath : LegacyFilePath;
+            if (File.Exists(sourcePath))
             {
-                var stored = JsonSerializer.Deserialize<StoredSettings>(File.ReadAllText(FilePath));
+                var stored = JsonSerializer.Deserialize<StoredSettings>(File.ReadAllText(sourcePath));
                 if (stored is not null)
                 {
                     var geometry = new WindowGeometry(
@@ -47,7 +51,12 @@ internal static class SettingsStore
                     var mode = stored.Mode is PomodoroMode.Standard25_5 or PomodoroMode.Extended50_10
                         ? stored.Mode.Value
                         : PomodoroMode.Standard25_5;
-                    return new AppSettings(geometry, volume, mode);
+                    var settings = new AppSettings(geometry, volume, mode);
+                    if (sourcePath == LegacyFilePath)
+                    {
+                        Save(settings);
+                    }
+                    return settings;
                 }
             }
         }

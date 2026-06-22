@@ -1,8 +1,8 @@
-# Pomodoro para Windows 11
+# AutoPomodoro para Windows 11
 
-Temporizador Pomodoro de escritorio sincronizado con la hora real. Permite trabajar con intervalos 25/5 o 50/10 sin iniciar, pausar ni reajustar manualmente el reloj.
+Temporizador Pomodoro de escritorio sincronizado con la hora real. AutoPomodoro permite trabajar con intervalos 25/5 o 50/10 sin iniciar, pausar ni reajustar manualmente el reloj.
 
-El icono propio de Pomodoro se integra en la aplicacion, la barra de tareas, los accesos directos y el instalador.
+El icono propio de AutoPomodoro se integra en la aplicacion, la barra de tareas, los accesos directos y el instalador.
 
 ## Funcionamiento
 
@@ -14,18 +14,18 @@ El icono propio de Pomodoro se integra en la aplicacion, la barra de tareas, los
 - Boton para restablecer volumen, modo, tamano y posicion a sus valores predeterminados.
 - Un tono suave al comenzar el descanso y tres tonos al volver al trabajo.
 - Una sola instancia y ninguna ejecucion en segundo plano al cerrar.
-- Recuerda tamano, posicion, modo y volumen en `%LocalAppData%\Pomodoro\settings.json`.
+- Recuerda tamano, posicion, modo y volumen en `%LocalAppData%\AutoPomodoro\settings.json` y migra automaticamente los ajustes de versiones anteriores.
 
 La ventana se cierra desde su icono en la barra de tareas o con `Alt+F4`. El menu se cierra con el boton `LISTO` o la tecla `Esc`; al cerrarlo guarda los cambios.
 
 ## Instalar
 
-Ejecuta `dist\Pomodoro-Setup.exe`. El instalador crea accesos en el escritorio y en el menu Inicio y no necesita permisos de administrador.
+Ejecuta `dist\AutoPomodoro-Setup.exe`. El instalador crea accesos en el escritorio y en el menu Inicio y no necesita permisos de administrador.
 
-El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. El archivo `Pomodoro-Setup.exe.sha256` permite comprobar que el instalador no ha cambiado:
+El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. El archivo `AutoPomodoro-Setup.exe.sha256` permite comprobar que el instalador no ha cambiado:
 
 ```powershell
-Get-FileHash .\dist\Pomodoro-Setup.exe -Algorithm SHA256
+Get-FileHash .\dist\AutoPomodoro-Setup.exe -Algorithm SHA256
 ```
 
 Volver a ejecutar el instalador reemplaza limpiamente la aplicacion y conserva la posicion y el tamano. La desinstalacion elimina tambien esos ajustes.
