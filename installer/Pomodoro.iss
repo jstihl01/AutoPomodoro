@@ -1,5 +1,5 @@
 #define MyAppName "Pomodoro"
-#define MyAppVersion "1.1.1"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "jstihl01"
 #define MyAppExeName "Pomodoro.exe"
 

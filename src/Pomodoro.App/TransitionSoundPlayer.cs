@@ -11,11 +11,11 @@ internal sealed class TransitionSoundPlayer
     private readonly SemaphoreSlim _playback = new(1, 1);
 
     public void PlayWorkFinished(int volumePercent) =>
-        QueuePlayback(volumePercent, () => Play(CreateTone(523.25, 700, Volume(volumePercent, 0.85))));
+        QueuePlayback(volumePercent, () => Play(CreateTone(523.25, 700, Volume(volumePercent, 2.70))));
 
     public void PlayRestFinished(int volumePercent) => QueuePlayback(volumePercent, () =>
     {
-        var tone = CreateTone(659.25, 170, Volume(volumePercent, 0.80));
+        var tone = CreateTone(659.25, 170, Volume(volumePercent, 2.25));
         for (var i = 0; i < 3; i++)
         {
             Play(tone);
@@ -27,7 +27,7 @@ internal sealed class TransitionSoundPlayer
     });
 
     public void PlayTest(int volumePercent) =>
-        QueuePlayback(volumePercent, () => Play(CreateTone(659.25, 170, Volume(volumePercent, 0.80))));
+        QueuePlayback(volumePercent, () => Play(CreateTone(659.25, 170, Volume(volumePercent, 2.25))));
 
     private void QueuePlayback(int volumePercent, Action playback)
     {
@@ -103,7 +103,8 @@ internal sealed class TransitionSoundPlayer
             }
 
             var value = Math.Sin(2 * Math.PI * frequency * sample / sampleRate);
-            writer.Write((short)(short.MaxValue * volume * envelope * value));
+            var limitedValue = Math.Tanh(volume * value) * 0.98;
+            writer.Write((short)(short.MaxValue * envelope * limitedValue));
         }
 
         return stream.ToArray();

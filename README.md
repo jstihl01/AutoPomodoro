@@ -11,6 +11,7 @@ El icono propio de Pomodoro se integra en la aplicacion, la barra de tareas, los
 - Fondo verde durante el trabajo 25/5, rojo durante el trabajo 50/10 y azul durante el descanso.
 - Siempre visible sobre las ventanas normales, redimensionable y sin barra superior ni boton de cierre.
 - Menu de ajustes para elegir modo y volumen entre 0% y 100%, con prueba sonora.
+- Boton para restablecer volumen, modo, tamano y posicion a sus valores predeterminados.
 - Un tono suave al comenzar el descanso y tres tonos al volver al trabajo.
 - Una sola instancia y ninguna ejecucion en segundo plano al cerrar.
 - Recuerda tamano, posicion, modo y volumen en `%LocalAppData%\Pomodoro\settings.json`.

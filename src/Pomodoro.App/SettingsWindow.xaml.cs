@@ -24,6 +24,8 @@ public partial class SettingsWindow : Window
         ? PomodoroMode.Extended50_10
         : PomodoroMode.Standard25_5;
 
+    internal event EventHandler? ResetWindowRequested;
+
     private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) =>
         UpdateVolumeText();
 
@@ -39,6 +41,13 @@ public partial class SettingsWindow : Window
         _sounds.PlayTest(VolumePercent);
 
     private void Done_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void Reset_Click(object sender, RoutedEventArgs e)
+    {
+        VolumeSlider.Value = SettingsStore.DefaultVolumePercent;
+        StandardMode.IsChecked = true;
+        ResetWindowRequested?.Invoke(this, EventArgs.Empty);
+    }
 
     private void Surface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

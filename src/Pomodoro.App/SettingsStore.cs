@@ -21,6 +21,9 @@ internal static class SettingsStore
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Pomodoro");
     private static readonly string FilePath = Path.Combine(DirectoryPath, "settings.json");
 
+    public static AppSettings Defaults() =>
+        new(DefaultGeometry(), DefaultVolumePercent, PomodoroMode.Standard25_5);
+
     public static AppSettings Load()
     {
         try
@@ -52,7 +55,7 @@ internal static class SettingsStore
         catch (JsonException) { }
         catch (UnauthorizedAccessException) { }
 
-        return new AppSettings(DefaultGeometry(), DefaultVolumePercent, PomodoroMode.Standard25_5);
+        return Defaults();
     }
 
     public static void Save(AppSettings settings)

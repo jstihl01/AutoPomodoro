@@ -134,8 +134,18 @@ public partial class MainWindow : Window
             Owner = this
         };
         _settingsWindow = settingsWindow;
+        settingsWindow.ResetWindowRequested += (_, _) =>
+            ApplyGeometry(SettingsStore.Defaults().Geometry);
         settingsWindow.Closed += SettingsWindow_Closed;
         settingsWindow.Show();
+    }
+
+    private void ApplyGeometry(WindowGeometry geometry)
+    {
+        Left = geometry.Left;
+        Top = geometry.Top;
+        Width = geometry.Width;
+        Height = geometry.Height;
     }
 
     private void SettingsWindow_Closed(object? sender, EventArgs e)
