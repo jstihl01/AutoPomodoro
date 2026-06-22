@@ -1,0 +1,124 @@
+using System.Diagnostics;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Pomodoro.Core;
+using MediaColor = System.Windows.Media.Color;
+
+namespace Pomodoro.App;
+
+public partial class MainWindow : Window
+{
+    private static readonly MediaColor WorkStart = MediaColor.FromRgb(99, 180, 71);
+    private static readonly MediaColor WorkEnd = MediaColor.FromRgb(22, 128, 77);
+    private static readonly MediaColor RestStart = MediaColor.FromRgb(48, 131, 246);
+    private static readonly MediaColor RestEnd = MediaColor.FromRgb(5, 91, 202);
+
+    private readonly DispatcherTimer _timer = new(DispatcherPriority.Render);
+    private readonly Stopwatch _awakeClock = Stopwatch.StartNew();
+    private readonly TransitionSoundPlayer _sounds = new();
+    private PomodoroSnapshot? _previousSnapshot;
+    private DateTimeOffset? _previousWallTime;
+    private TimeSpan _previousAwakeTime;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        ApplySavedGeometry();
+        UpdateTimer();
+        _timer.Interval = TimeSpan.FromMilliseconds(100);
+        _timer.Tick += (_, _) => UpdateTimer();
+        _timer.Start();
+    }
+
+    public void BringToFront()
+    {
+        if (WindowState == WindowState.Minimized)
+        {
+            WindowState = WindowState.Normal;
+        }
+
+        Topmost = true;
+        Activate();
+        Focus();
+    }
+
+    private void ApplySavedGeometry()
+    {
+        var geometry = WindowSettingsStore.Load();
+        Left = geometry.Left;
+        Top = geometry.Top;
+        Width = geometry.Width;
+        Height = geometry.Height;
+    }
+
+    private void UpdateTimer()
+    {
+        var now = DateTimeOffset.Now;
+        var awakeNow = _awakeClock.Elapsed;
+        var snapshot = PomodoroClock.At(now);
+
+        CountdownText.Text = snapshot.Countdown;
+        PhaseText.Text = snapshot.Label;
+        ApplyPhase(snapshot.Phase);
+
+        if (_previousSnapshot is { } previous && previous.Phase != snapshot.Phase &&
+            _previousWallTime is { } previousWall)
+        {
+            var wallGap = now - previousWall;
+            var awakeGap = awakeNow - _previousAwakeTime;
+            if (wallGap >= TimeSpan.Zero && wallGap <= TimeSpan.FromSeconds(2) &&
+                awakeGap <= TimeSpan.FromSeconds(2))
+            {
+                if (snapshot.Phase == PomodoroPhase.Rest)
+                {
+                    _sounds.PlayWorkFinished();
+                }
+                else
+                {
+                    _sounds.PlayRestFinished();
+                }
+            }
+        }
+
+        _previousSnapshot = snapshot;
+        _previousWallTime = now;
+        _previousAwakeTime = awakeNow;
+    }
+
+    private void ApplyPhase(PomodoroPhase phase)
+    {
+        if (phase == PomodoroPhase.Work)
+        {
+            ColorStart.Color = WorkStart;
+            ColorEnd.Color = WorkEnd;
+            Background = new SolidColorBrush(WorkEnd);
+        }
+        else
+        {
+            ColorStart.Color = RestStart;
+            ColorEnd.Color = RestEnd;
+            Background = new SolidColorBrush(RestEnd);
+        }
+    }
+
+    private void Surface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void Window_SourceInitialized(object? sender, EventArgs e) =>
+        NativeWindow.EnableRoundedCorners(this);
+
+    private void Window_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        _timer.Stop();
+        WindowSettingsStore.Save(this);
+    }
+}
