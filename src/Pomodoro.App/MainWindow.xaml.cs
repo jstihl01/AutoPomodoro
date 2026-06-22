@@ -12,18 +12,23 @@ public partial class MainWindow : Window
 {
     private static readonly MediaColor WorkStart = MediaColor.FromRgb(99, 180, 71);
     private static readonly MediaColor WorkEnd = MediaColor.FromRgb(22, 128, 77);
+    private static readonly MediaColor ExtendedWorkStart = MediaColor.FromRgb(224, 72, 72);
+    private static readonly MediaColor ExtendedWorkEnd = MediaColor.FromRgb(161, 30, 48);
     private static readonly MediaColor RestStart = MediaColor.FromRgb(48, 131, 246);
     private static readonly MediaColor RestEnd = MediaColor.FromRgb(5, 91, 202);
 
     private readonly DispatcherTimer _timer = new(DispatcherPriority.Render);
     private readonly Stopwatch _awakeClock = Stopwatch.StartNew();
     private readonly TransitionSoundPlayer _sounds = new();
+    private AppSettings _settings;
+    private SettingsWindow? _settingsWindow;
     private PomodoroSnapshot? _previousSnapshot;
     private DateTimeOffset? _previousWallTime;
     private TimeSpan _previousAwakeTime;
 
     public MainWindow()
     {
+        _settings = SettingsStore.Load();
         InitializeComponent();
         ApplySavedGeometry();
         UpdateTimer();
@@ -46,7 +51,7 @@ public partial class MainWindow : Window
 
     private void ApplySavedGeometry()
     {
-        var geometry = WindowSettingsStore.Load();
+        var geometry = _settings.Geometry;
         Left = geometry.Left;
         Top = geometry.Top;
         Width = geometry.Width;
@@ -57,11 +62,11 @@ public partial class MainWindow : Window
     {
         var now = DateTimeOffset.Now;
         var awakeNow = _awakeClock.Elapsed;
-        var snapshot = PomodoroClock.At(now);
+        var snapshot = PomodoroClock.At(now, _settings.Mode);
 
         CountdownText.Text = snapshot.Countdown;
         PhaseText.Text = snapshot.Label;
-        ApplyPhase(snapshot.Phase);
+        ApplyPhase(snapshot.Phase, _settings.Mode);
 
         if (_previousSnapshot is { } previous && previous.Phase != snapshot.Phase &&
             _previousWallTime is { } previousWall)
@@ -73,11 +78,11 @@ public partial class MainWindow : Window
             {
                 if (snapshot.Phase == PomodoroPhase.Rest)
                 {
-                    _sounds.PlayWorkFinished();
+                    _sounds.PlayWorkFinished(_settings.VolumePercent);
                 }
                 else
                 {
-                    _sounds.PlayRestFinished();
+                    _sounds.PlayRestFinished(_settings.VolumePercent);
                 }
             }
         }
@@ -87,13 +92,15 @@ public partial class MainWindow : Window
         _previousAwakeTime = awakeNow;
     }
 
-    private void ApplyPhase(PomodoroPhase phase)
+    private void ApplyPhase(PomodoroPhase phase, PomodoroMode mode)
     {
         if (phase == PomodoroPhase.Work)
         {
-            ColorStart.Color = WorkStart;
-            ColorEnd.Color = WorkEnd;
-            Background = new SolidColorBrush(WorkEnd);
+            var start = mode == PomodoroMode.Standard25_5 ? WorkStart : ExtendedWorkStart;
+            var end = mode == PomodoroMode.Standard25_5 ? WorkEnd : ExtendedWorkEnd;
+            ColorStart.Color = start;
+            ColorEnd.Color = end;
+            Background = new SolidColorBrush(end);
         }
         else
         {
@@ -111,7 +118,48 @@ public partial class MainWindow : Window
         }
     }
 
-    private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
+    private void MenuButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_settingsWindow is not null)
+        {
+            _settingsWindow.Activate();
+            return;
+        }
+
+        var settingsWindow = new SettingsWindow(
+            _settings.VolumePercent,
+            _settings.Mode,
+            _sounds)
+        {
+            Owner = this
+        };
+        _settingsWindow = settingsWindow;
+        settingsWindow.Closed += SettingsWindow_Closed;
+        settingsWindow.Show();
+    }
+
+    private void SettingsWindow_Closed(object? sender, EventArgs e)
+    {
+        if (sender is SettingsWindow settingsWindow)
+        {
+            var modeChanged = _settings.Mode != settingsWindow.SelectedMode;
+            _settings = new AppSettings(
+                SettingsStore.GeometryOf(this),
+                settingsWindow.VolumePercent,
+                settingsWindow.SelectedMode);
+            SettingsStore.Save(_settings);
+
+            if (modeChanged)
+            {
+                _previousSnapshot = null;
+                _previousWallTime = null;
+            }
+
+            UpdateTimer();
+        }
+
+        _settingsWindow = null;
+    }
 
     private void Window_SourceInitialized(object? sender, EventArgs e) =>
         NativeWindow.EnableRoundedCorners(this);
@@ -119,6 +167,12 @@ public partial class MainWindow : Window
     private void Window_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();
-        WindowSettingsStore.Save(this);
+        if (_settingsWindow is not null)
+        {
+            _settingsWindow.Close();
+        }
+
+        _settings = _settings with { Geometry = SettingsStore.GeometryOf(this) };
+        SettingsStore.Save(_settings);
     }
 }

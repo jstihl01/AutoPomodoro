@@ -8,22 +8,50 @@ internal sealed class TransitionSoundPlayer
     private const uint SoundMemory = 0x0004;
     private const uint SoundNodefault = 0x0002;
     private const uint SoundSync = 0x0000;
-    private readonly byte[] _longTone = CreateTone(523.25, 700, 0.20);
-    private readonly byte[] _shortTone = CreateTone(659.25, 170, 0.18);
+    private readonly SemaphoreSlim _playback = new(1, 1);
 
-    public void PlayWorkFinished() => _ = Task.Run(() => Play(_longTone));
+    public void PlayWorkFinished(int volumePercent) =>
+        QueuePlayback(volumePercent, () => Play(CreateTone(523.25, 700, Volume(volumePercent, 0.85))));
 
-    public void PlayRestFinished() => _ = Task.Run(() =>
+    public void PlayRestFinished(int volumePercent) => QueuePlayback(volumePercent, () =>
     {
+        var tone = CreateTone(659.25, 170, Volume(volumePercent, 0.80));
         for (var i = 0; i < 3; i++)
         {
-            Play(_shortTone);
+            Play(tone);
             if (i < 2)
             {
                 Thread.Sleep(130);
             }
         }
     });
+
+    public void PlayTest(int volumePercent) =>
+        QueuePlayback(volumePercent, () => Play(CreateTone(659.25, 170, Volume(volumePercent, 0.80))));
+
+    private void QueuePlayback(int volumePercent, Action playback)
+    {
+        if (volumePercent <= 0)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            await _playback.WaitAsync();
+            try
+            {
+                playback();
+            }
+            finally
+            {
+                _playback.Release();
+            }
+        });
+    }
+
+    private static double Volume(int volumePercent, double maximum) =>
+        Math.Clamp(volumePercent, 0, 100) / 100d * maximum;
 
     private static void Play(byte[] wave)
     {

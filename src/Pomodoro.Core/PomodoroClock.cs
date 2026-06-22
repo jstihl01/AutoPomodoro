@@ -6,6 +6,12 @@ public enum PomodoroPhase
     Rest
 }
 
+public enum PomodoroMode
+{
+    Standard25_5,
+    Extended50_10
+}
+
 public readonly record struct PomodoroSnapshot(PomodoroPhase Phase, int RemainingSeconds)
 {
     public string Countdown => $"{RemainingSeconds / 60:00}:{RemainingSeconds % 60:00}";
@@ -14,26 +20,25 @@ public readonly record struct PomodoroSnapshot(PomodoroPhase Phase, int Remainin
 
 public static class PomodoroClock
 {
-    private const double WorkSeconds = 25 * 60;
-    private const double CycleSeconds = 30 * 60;
-
-    public static PomodoroSnapshot At(DateTimeOffset localTime)
+    public static PomodoroSnapshot At(DateTimeOffset localTime, PomodoroMode mode = PomodoroMode.Standard25_5)
     {
-        var seconds = (localTime.Minute % 30 * 60)
+        var workSeconds = mode == PomodoroMode.Standard25_5 ? 25 * 60d : 50 * 60d;
+        var cycleSeconds = mode == PomodoroMode.Standard25_5 ? 30 * 60d : 60 * 60d;
+        var cycleMinutes = mode == PomodoroMode.Standard25_5 ? localTime.Minute % 30 : localTime.Minute;
+        var seconds = (cycleMinutes * 60)
             + localTime.Second
             + localTime.Millisecond / 1000d
             + localTime.Microsecond / 1_000_000d;
 
-        if (seconds < WorkSeconds)
+        if (seconds < workSeconds)
         {
             return new PomodoroSnapshot(
                 PomodoroPhase.Work,
-                Math.Max(1, (int)Math.Ceiling(WorkSeconds - seconds)));
+                Math.Max(1, (int)Math.Ceiling(workSeconds - seconds)));
         }
 
         return new PomodoroSnapshot(
             PomodoroPhase.Rest,
-            Math.Max(1, (int)Math.Ceiling(CycleSeconds - seconds)));
+            Math.Max(1, (int)Math.Ceiling(cycleSeconds - seconds)));
     }
 }
-

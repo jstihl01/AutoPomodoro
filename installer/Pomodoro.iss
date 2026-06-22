@@ -1,5 +1,5 @@
 #define MyAppName "Pomodoro"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "jstihl01"
 #define MyAppExeName "Pomodoro.exe"
 
@@ -41,4 +41,3 @@ Filename: "{app}\{#MyAppExeName}"; Description: "Abrir Pomodoro"; Flags: nowait 
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{localappdata}\Pomodoro"
-

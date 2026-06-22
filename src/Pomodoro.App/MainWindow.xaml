@@ -30,49 +30,13 @@
             </LinearGradientBrush>
         </Border.Background>
 
-        <Grid Margin="20">
+        <Grid Margin="16">
             <Grid.RowDefinitions>
-                <RowDefinition Height="44" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="0.66*" />
                 <RowDefinition Height="0.34*" />
-                <RowDefinition Height="20" />
             </Grid.RowDefinitions>
 
-            <Button Grid.Row="0"
-                    HorizontalAlignment="Right"
-                    Width="44" Height="44"
-                    Padding="10"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    ToolTip="Cerrar"
-                    WindowChrome.IsHitTestVisibleInChrome="True"
-                    Click="CloseButton_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Grid Background="Transparent">
-                            <Path x:Name="ClosePath"
-                                  Stroke="White"
-                                  StrokeThickness="3"
-                                  StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round"
-                                  Data="M 7,7 L 23,23 M 23,7 L 7,23"
-                                  Stretch="Uniform"
-                                  Margin="8" />
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ClosePath" Property="Opacity" Value="0.72" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ClosePath" Property="Opacity" Value="0.5" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-
-            <Viewbox Grid.Row="1" Stretch="Uniform" Margin="10,2">
+            <Viewbox Grid.Row="0" Stretch="Uniform" Margin="8,24,8,0">
                 <TextBlock x:Name="CountdownText"
                            Text="25:00"
                            Foreground="White"
@@ -83,16 +47,51 @@
                            TextAlignment="Center" />
             </Viewbox>
 
-            <Viewbox Grid.Row="2" Stretch="Uniform" Margin="30,4,30,14">
+            <Viewbox Grid.Row="1" Stretch="Uniform" Margin="18,0,18,12">
                 <TextBlock x:Name="PhaseText"
                            Text="TRABAJO"
                            Foreground="White"
                            FontFamily="Segoe UI Variable Text, Segoe UI"
                            FontWeight="SemiBold"
-                           FontSize="28"
+                           FontSize="34"
                            TextWrapping="NoWrap"
                            TextAlignment="Center" />
             </Viewbox>
+
+            <Button Grid.RowSpan="2"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Width="38" Height="38"
+                    Padding="8"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    ToolTip="Ajustes"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    Click="MenuButton_Click">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Grid Background="Transparent">
+                            <Path x:Name="MenuPath"
+                                  Stroke="White"
+                                  StrokeThickness="2.6"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  Data="M 4,7 L 26,7 M 4,15 L 26,15 M 4,23 L 26,23"
+                                  Stretch="Uniform"
+                                  Margin="8" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="MenuPath" Property="Opacity" Value="0.72" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="MenuPath" Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
         </Grid>
     </Border>
 </Window>
