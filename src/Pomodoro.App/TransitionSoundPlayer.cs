@@ -11,11 +11,11 @@ internal sealed class TransitionSoundPlayer
     private readonly SemaphoreSlim _playback = new(1, 1);
 
     public void PlayWorkFinished(int volumePercent) =>
-        QueuePlayback(volumePercent, () => Play(CreateTone(523.25, 700, Volume(volumePercent, 2.70))));
+        QueuePlayback(volumePercent, () => Play(CreateTone(523.25, 700, Volume(volumePercent, 8.10))));
 
     public void PlayRestFinished(int volumePercent) => QueuePlayback(volumePercent, () =>
     {
-        var tone = CreateTone(659.25, 170, Volume(volumePercent, 2.25));
+        var tone = CreateTone(659.25, 170, Volume(volumePercent, 6.75));
         for (var i = 0; i < 3; i++)
         {
             Play(tone);
@@ -27,7 +27,7 @@ internal sealed class TransitionSoundPlayer
     });
 
     public void PlayTest(int volumePercent) =>
-        QueuePlayback(volumePercent, () => Play(CreateTone(659.25, 170, Volume(volumePercent, 2.25))));
+        QueuePlayback(volumePercent, () => Play(CreateTone(659.25, 170, Volume(volumePercent, 6.75))));
 
     private void QueuePlayback(int volumePercent, Action playback)
     {
