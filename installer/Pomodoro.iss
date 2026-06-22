@@ -1,5 +1,5 @@
 #define MyAppName "Pomodoro"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 #define MyAppPublisher "jstihl01"
 #define MyAppExeName "Pomodoro.exe"
 
@@ -17,12 +17,14 @@ OutputBaseFilename=Pomodoro-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\assets\pomodoro.ico
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 CloseApplications=yes
 CloseApplicationsFilter={#MyAppExeName}
 RestartApplications=no
 UninstallDisplayName={#MyAppName}
+UninstallDisplayIcon={app}\{#MyAppExeName}
 AppMutex=Pomodoro-8146708D-9AF6-43D9-87B8-76F527A8AC19
 SetupLogging=yes
 

@@ -8,6 +8,8 @@
     <AssemblyName>Pomodoro</AssemblyName>
     <RootNamespace>Pomodoro.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\pomodoro.ico</ApplicationIcon>
+    <Version>1.1.1</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pomodoro.Core\Pomodoro.Core.csproj" />

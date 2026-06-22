@@ -2,6 +2,8 @@
 
 Temporizador Pomodoro de escritorio sincronizado con la hora real. Permite trabajar con intervalos 25/5 o 50/10 sin iniciar, pausar ni reajustar manualmente el reloj.
 
+El icono propio de Pomodoro se integra en la aplicacion, la barra de tareas, los accesos directos y el instalador.
+
 ## Funcionamiento
 
 - Modo 25/5: trabajo de `:00` a `:25` y de `:30` a `:55`; descanso durante los cinco minutos restantes de cada media hora.
