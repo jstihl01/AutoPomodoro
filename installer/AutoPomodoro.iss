@@ -1,5 +1,5 @@
 #define MyAppName "AutoPomodoro"
-#define MyAppVersion "1.3.1"
+#define MyAppVersion "1.4.0"
 #define MyAppPublisher "jstihl01"
 #define MyAppExeName "AutoPomodoro.exe"
 
@@ -12,8 +12,8 @@ DefaultDirName={localappdata}\Programs\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
-OutputDir=..\dist
-OutputBaseFilename=AutoPomodoro-Setup
+OutputDir=..\releases
+OutputBaseFilename=AutoPomodoro-Setup-v{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

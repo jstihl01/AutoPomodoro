@@ -9,7 +9,7 @@
     <RootNamespace>Pomodoro.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>..\..\assets\autopomodoro.ico</ApplicationIcon>
-    <Version>1.3.1</Version>
+    <Version>1.4.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pomodoro.Core\Pomodoro.Core.csproj" />

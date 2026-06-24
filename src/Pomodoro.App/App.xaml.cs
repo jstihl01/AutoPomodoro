@@ -5,6 +5,7 @@ namespace Pomodoro.App;
 public partial class App : System.Windows.Application
 {
     private SingleInstanceCoordinator? _singleInstance;
+    private SystemSleepGuard? _sleepGuard;
     private MainWindow? _mainWindow;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -19,6 +20,7 @@ public partial class App : System.Windows.Application
             return;
         }
 
+        _sleepGuard = new SystemSleepGuard();
         _mainWindow = new MainWindow();
         MainWindow = _mainWindow;
         ShutdownMode = ShutdownMode.OnMainWindowClose;
@@ -30,6 +32,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _sleepGuard?.Dispose();
         _singleInstance?.Dispose();
         base.OnExit(e);
     }
