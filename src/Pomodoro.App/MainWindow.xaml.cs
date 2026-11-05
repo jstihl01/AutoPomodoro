@@ -10,12 +10,9 @@ namespace Pomodoro.App;
 
 public partial class MainWindow : Window
 {
-    private static readonly MediaColor WorkStart = MediaColor.FromRgb(99, 180, 71);
-    private static readonly MediaColor WorkEnd = MediaColor.FromRgb(22, 128, 77);
-    private static readonly MediaColor ExtendedWorkStart = MediaColor.FromRgb(224, 72, 72);
-    private static readonly MediaColor ExtendedWorkEnd = MediaColor.FromRgb(161, 30, 48);
-    private static readonly MediaColor RestStart = MediaColor.FromRgb(48, 131, 246);
-    private static readonly MediaColor RestEnd = MediaColor.FromRgb(5, 91, 202);
+    private static readonly SolidColorBrush WorkBrush = new(MediaColor.FromRgb(36, 152, 91));
+    private static readonly SolidColorBrush ExtendedWorkBrush = new(MediaColor.FromRgb(198, 56, 78));
+    private static readonly SolidColorBrush RestBrush = new(MediaColor.FromRgb(30, 107, 211));
 
     private readonly DispatcherTimer _timer = new(DispatcherPriority.Render);
     private readonly Stopwatch _awakeClock = Stopwatch.StartNew();
@@ -37,11 +34,6 @@ public partial class MainWindow : Window
         _timer.Tick += (_, _) => UpdateTimer();
         _timer.Start();
         Loaded += (_, _) => { if (_settings.TaskbarMode) UseTaskbar(); };
-        var menu = new System.Windows.Controls.ContextMenu();
-        var widgetItem = new System.Windows.Controls.MenuItem { Header = "Mostrar en barra de tareas" };
-        widgetItem.Click += (_, _) => UseTaskbar();
-        menu.Items.Add(widgetItem);
-        ContextMenu = menu;
     }
 
     public void BringToFront()
@@ -103,25 +95,14 @@ public partial class MainWindow : Window
 
     private void ApplyPhase(PomodoroPhase phase, PomodoroMode mode)
     {
-        if (phase == PomodoroPhase.Work)
-        {
-            var start = mode == PomodoroMode.Standard25_5 ? WorkStart : ExtendedWorkStart;
-            var end = mode == PomodoroMode.Standard25_5 ? WorkEnd : ExtendedWorkEnd;
-            ColorStart.Color = start;
-            ColorEnd.Color = end;
-            Background = new SolidColorBrush(end);
-        }
-        else
-        {
-            ColorStart.Color = RestStart;
-            ColorEnd.Color = RestEnd;
-            Background = new SolidColorBrush(RestEnd);
-        }
+        Background = phase == PomodoroPhase.Rest ? RestBrush
+            : mode == PomodoroMode.Standard25_5 ? WorkBrush : ExtendedWorkBrush;
     }
 
     private void Surface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+        if (!IsInteractiveSource(e.OriginalSource as DependencyObject) &&
+            e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
         {
             DragMove();
         }
@@ -148,9 +129,11 @@ public partial class MainWindow : Window
         };
         _settingsWindow = settingsWindow;
         settingsWindow.ResetWindowRequested += (_, _) =>
+        {
             ApplyGeometry(SettingsStore.Defaults().Geometry);
+            SaveTaskbarOffset(0);
+        };
         settingsWindow.Closed += SettingsWindow_Closed;
-        settingsWindow.TaskbarRequested += (_, _) => UseTaskbar();
         settingsWindow.Show();
     }
 
@@ -227,6 +210,8 @@ public partial class MainWindow : Window
         _widget = null;
         widget?.Close();
         Show();
+        WindowState = WindowState.Normal;
+        Activate();
         SettingsStore.Save(_settings);
     }
 
@@ -254,7 +239,29 @@ public partial class MainWindow : Window
 
     internal void SaveTaskbarOffset(int offset)
     {
-        _settings = _settings with { TaskbarOffset = offset };
+        _settings = _settings with { TaskbarOffset = Math.Clamp(offset, 0, 4000) };
         SettingsStore.Save(_settings);
+    }
+
+    private void Minimize_Click(object sender, RoutedEventArgs e) => UseTaskbar();
+
+    private void Window_StateChanged(object? sender, EventArgs e)
+    {
+        if (WindowState == WindowState.Minimized)
+        {
+            WindowState = WindowState.Normal;
+            UseTaskbar();
+        }
+    }
+
+    internal static bool IsInteractiveSource(DependencyObject? source)
+    {
+        while (source is not null)
+        {
+            if (source is System.Windows.Controls.Primitives.ButtonBase or System.Windows.Controls.Slider or System.Windows.Controls.Primitives.Thumb)
+                return true;
+            source = source is Visual ? VisualTreeHelper.GetParent(source) : LogicalTreeHelper.GetParent(source);
+        }
+        return false;
     }
 }

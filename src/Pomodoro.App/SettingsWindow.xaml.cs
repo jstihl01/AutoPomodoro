@@ -25,13 +25,6 @@ public partial class SettingsWindow : Window
         : PomodoroMode.Standard25_5;
 
     internal event EventHandler? ResetWindowRequested;
-    internal event EventHandler? TaskbarRequested;
-
-    private void Taskbar_Click(object sender, RoutedEventArgs e)
-    {
-        Close();
-        TaskbarRequested?.Invoke(this, EventArgs.Empty);
-    }
 
     private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) =>
         UpdateVolumeText();
@@ -58,7 +51,8 @@ public partial class SettingsWindow : Window
 
     private void Surface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
+        if (!MainWindow.IsInteractiveSource(e.OriginalSource as DependencyObject) &&
+            e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
         {
             DragMove();
         }

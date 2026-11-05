@@ -1,0 +1,9 @@
+<UserControl x:Class="Pomodoro.App.VolumeIcon" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="Root" Focusable="False" IsHitTestVisible="False">
+    <Viewbox><Canvas Width="26" Height="24">
+        <Path Stroke="{Binding Foreground, ElementName=Root}" StrokeThickness="1.7" StrokeLineJoin="Round" Data="M 3,9 L 7,9 L 12,5 L 12,19 L 7,15 L 3,15 Z"/>
+        <Path x:Name="Low" Stroke="{Binding Foreground, ElementName=Root}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 15,10 Q 17,12 15,14"/>
+        <Path x:Name="Medium" Stroke="{Binding Foreground, ElementName=Root}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 17.5,7.5 Q 22,12 17.5,16.5"/>
+        <Path x:Name="High" Stroke="{Binding Foreground, ElementName=Root}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 20,5 Q 27,12 20,19"/>
+        <Path x:Name="Muted" Stroke="{Binding Foreground, ElementName=Root}" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 16,9 L 22,15 M 22,9 L 16,15"/>
+    </Canvas></Viewbox>
+</UserControl>

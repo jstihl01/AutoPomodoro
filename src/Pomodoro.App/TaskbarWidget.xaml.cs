@@ -41,11 +41,10 @@ public partial class TaskbarWidget : Window
             ? Color.FromRgb(75, 160, 255)
             : settings.Mode == PomodoroMode.Standard25_5
                 ? Color.FromRgb(83, 210, 110) : Color.FromRgb(255, 95, 105));
-        Countdown.ToolTip = $"{snapshot.Label} · {(settings.Mode == PomodoroMode.Standard25_5 ? "25/5" : "50/10")} · Clic derecho para opciones";
         _updating = true;
         VolumeSlider.Value = settings.VolumePercent;
-        VolumeLabel.Text = $"Volumen: {settings.VolumePercent}%";
-        VolumeButton.Content = settings.VolumePercent == 0 ? "\uE74F" : "\uE767";
+        VolumeLabel.Text = $"{settings.VolumePercent}%";
+        Speaker.Volume = settings.VolumePercent;
         _updating = false;
     }
 
@@ -61,27 +60,7 @@ public partial class TaskbarWidget : Window
         if (result == TaskbarPlacement.Result.Hidden) VolumePopup.IsOpen = false;
     }
 
-    private void OpenMenu(object sender, MouseButtonEventArgs e)
-    {
-        VolumePopup.IsOpen = false;
-        var menu = new ContextMenu();
-        Add("Mostrar como ventana", _controller.UseWindow);
-        Add("Trabajo 25 / 5", () => _controller.ChangeMode(PomodoroMode.Standard25_5));
-        Add("Trabajo 50 / 10", () => _controller.ChangeMode(PomodoroMode.Extended50_10));
-        Add("Mover a la izquierda", () => { _offset = Math.Min(4000, _offset + 24); _controller.SaveTaskbarOffset(_offset); Place(); });
-        Add("Mover a la derecha", () => { _offset = Math.Max(0, _offset - 24); _controller.SaveTaskbarOffset(_offset); Place(); });
-        Add("Ajustes", _controller.OpenSettings);
-        Add("Salir", _controller.Close);
-        menu.PlacementTarget = this;
-        menu.IsOpen = true;
-        e.Handled = true;
-        void Add(string label, Action action)
-        {
-            var item = new MenuItem { Header = label };
-            item.Click += (_, _) => action();
-            menu.Items.Add(item);
-        }
-    }
+    private void OpenWindow(object sender, RoutedEventArgs e) => _controller.BringToFront();
 
     private void ToggleMute(object sender, RoutedEventArgs e) => _controller.ToggleMute();
     private void ShowVolume(object sender, MouseEventArgs e) { _popupTimer.Stop(); VolumePopup.IsOpen = true; }

@@ -35,13 +35,13 @@ internal static class TaskbarPlacement
             return Result.Hidden;
         }
         var scale = GetDpiForWindow(bar) / 96.0;
-        var width = (int)Math.Round(126 * scale);
+        var width = (int)Math.Round(114 * scale);
         var height = Math.Min((int)Math.Round(36 * scale), bounds.Bottom - bounds.Top);
         var x = Math.Max(bounds.Left, trayBounds.Left - width - (int)Math.Round((offset + 8) * scale));
         var y = bounds.Top + (bounds.Bottom - bounds.Top - height) / 2;
         // Ownership makes the widget follow Explorer's z-order without becoming an
         // Explorer child (which could be destroyed when Explorer restarts).
-        SetWindowLongPtr(widget, -8, bar);
+        if (GetWindowLongPtr(widget, -8) != bar) SetWindowLongPtr(widget, -8, bar);
         if (!SetWindowPos(widget, new nint(-1), x, y, width, height, 0x0010 | 0x0040)) return Result.Unavailable;
         return Result.Visible;
     }
@@ -58,6 +58,7 @@ internal static class TaskbarPlacement
     [DllImport("user32.dll")] private static extern nint MonitorFromWindow(nint window, uint flags);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern bool GetMonitorInfo(nint monitor, ref MonitorInfo info);
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")] private static extern nint SetWindowLongPtr(nint window, int index, nint value);
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")] private static extern nint GetWindowLongPtr(nint window, int index);
     [DllImport("user32.dll")] private static extern bool SetWindowPos(nint window, nint after, int x, int y, int width, int height, uint flags);
     [DllImport("user32.dll")] private static extern bool ShowWindow(nint window, int command);
 }

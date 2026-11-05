@@ -1,97 +1,20 @@
-<Window x:Class="Pomodoro.App.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="AutoPomodoro"
-        Width="320" Height="320"
-        MinWidth="220" MinHeight="180"
-        WindowStyle="None"
-        ResizeMode="CanResize"
-        WindowStartupLocation="Manual"
-        Topmost="True"
-        ShowInTaskbar="True"
-        Background="#238F55"
-        SourceInitialized="Window_SourceInitialized"
-        Closing="Window_Closing">
-    <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0"
-                      ResizeBorderThickness="8"
-                      CornerRadius="18"
-                      GlassFrameThickness="0"
-                      UseAeroCaptionButtons="False" />
-    </WindowChrome.WindowChrome>
-
-    <Border x:Name="Surface"
-            CornerRadius="18"
-            MouseLeftButtonDown="Surface_MouseLeftButtonDown">
-        <Border.Background>
-            <LinearGradientBrush x:Name="BackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-                <GradientStop x:Name="ColorStart" Color="#63B447" Offset="0" />
-                <GradientStop x:Name="ColorEnd" Color="#16804D" Offset="1" />
-            </LinearGradientBrush>
-        </Border.Background>
-
-        <Grid Margin="16">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="0.66*" />
-                <RowDefinition Height="0.34*" />
-            </Grid.RowDefinitions>
-
-            <Viewbox Grid.Row="0" Stretch="Uniform" Margin="8,24,8,0">
-                <TextBlock x:Name="CountdownText"
-                           Text="25:00"
-                           Foreground="White"
-                           FontFamily="Segoe UI Variable Display, Segoe UI"
-                           FontWeight="SemiBold"
-                           FontSize="86"
-                           TextWrapping="NoWrap"
-                           TextAlignment="Center" />
-            </Viewbox>
-
-            <Viewbox Grid.Row="1" Stretch="Uniform" Margin="18,0,18,12">
-                <TextBlock x:Name="PhaseText"
-                           Text="TRABAJO"
-                           Foreground="White"
-                           FontFamily="Segoe UI Variable Text, Segoe UI"
-                           FontWeight="SemiBold"
-                           FontSize="34"
-                           TextWrapping="NoWrap"
-                           TextAlignment="Center" />
-            </Viewbox>
-
-            <Button Grid.RowSpan="2"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Width="38" Height="38"
-                    Padding="8"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    ToolTip="Ajustes"
-                    WindowChrome.IsHitTestVisibleInChrome="True"
-                    Click="MenuButton_Click">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Grid Background="Transparent">
-                            <Path x:Name="MenuPath"
-                                  Stroke="White"
-                                  StrokeThickness="2.6"
-                                  StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round"
-                                  Data="M 4,7 L 26,7 M 4,15 L 26,15 M 4,23 L 26,23"
-                                  Stretch="Uniform"
-                                  Margin="8" />
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="MenuPath" Property="Opacity" Value="0.72" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="MenuPath" Property="Opacity" Value="0.5" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Button.Template>
+<Window x:Class="Pomodoro.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AutoPomodoro" Width="320" Height="320" MinWidth="220" MinHeight="180" WindowStyle="None" ResizeMode="CanResize" WindowStartupLocation="Manual"
+        Topmost="True" ShowInTaskbar="True" Background="#24985B" UseLayoutRounding="True" SourceInitialized="Window_SourceInitialized" Closing="Window_Closing" StateChanged="Window_StateChanged">
+    <WindowChrome.WindowChrome><WindowChrome CaptionHeight="0" ResizeBorderThickness="8" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/></WindowChrome.WindowChrome>
+    <Grid Background="Transparent" MouseLeftButtonDown="Surface_MouseLeftButtonDown">
+        <Grid.RowDefinitions><RowDefinition Height="48"/><RowDefinition/><RowDefinition Height="0.42*"/></Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="6">
+            <Button Style="{StaticResource IconButton}" ToolTip="Mostrar en barra de tareas" AutomationProperties.AutomationId="MinimizeToWidget" AutomationProperties.Name="Mostrar en barra de tareas" Click="Minimize_Click" Margin="0,0,4,0">
+                <Path Stroke="White" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M 3,12 L 19,12" Width="22" Height="22"/>
             </Button>
-        </Grid>
-    </Border>
+            <Button Style="{StaticResource IconButton}" ToolTip="Ajustes" AutomationProperties.AutomationId="OpenSettings" AutomationProperties.Name="Ajustes" Click="MenuButton_Click">
+                <Path Stroke="White" StrokeThickness="1.6" StrokeLineJoin="Round" Width="22" Height="22" Data="M 9,2 L 13,2 L 14,5 L 16,6 L 19,5 L 21,9 L 19,11 L 19,13 L 21,15 L 19,19 L 16,18 L 14,19 L 13,22 L 9,22 L 8,19 L 6,18 L 3,19 L 1,15 L 3,13 L 3,11 L 1,9 L 3,5 L 6,6 L 8,5 Z M 15,12 A 4,4 0 1 1 7,12 A 4,4 0 1 1 15,12" Stretch="Uniform"/>
+            </Button>
+        </StackPanel>
+        <Viewbox Grid.Row="1" Stretch="Uniform" Margin="20,0,20,0">
+            <Grid Width="300" Height="110"><TextBlock x:Name="CountdownText" Text="25:00" FontFamily="Consolas" FontSize="94" FontWeight="Normal" Foreground="White" TextAlignment="Center" VerticalAlignment="Center" Typography.NumeralAlignment="Tabular" AutomationProperties.AutomationId="WindowCountdown"/></Grid>
+        </Viewbox>
+        <Viewbox Grid.Row="2" Stretch="Uniform" Margin="24,0,24,24"><TextBlock x:Name="PhaseText" Text="TRABAJO" Foreground="White" FontFamily="Segoe UI" FontWeight="SemiBold" FontSize="30"/></Viewbox>
+    </Grid>
 </Window>

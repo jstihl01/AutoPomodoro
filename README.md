@@ -8,7 +8,8 @@ El icono propio de AutoPomodoro se integra en la aplicacion, la barra de tareas,
 
 - Modo 25/5: trabajo de `:00` a `:25` y de `:30` a `:55`; descanso durante los cinco minutos restantes de cada media hora.
 - Modo 50/10: trabajo de `:00` a `:50`; descanso durante los diez minutos restantes de cada hora.
-- Fondo verde durante el trabajo 25/5, rojo durante el trabajo 50/10 y azul durante el descanso.
+- Colores planos: verde durante el trabajo 25/5, rojo durante el trabajo 50/10 y azul durante el descanso.
+- Contador monoespaciado Consolas con ancho estable en ventana y widget.
 - Siempre visible sobre las ventanas normales, redimensionable y sin barra superior ni boton de cierre.
 - Mientras esta abierta, mantiene la pantalla encendida y evita la suspension por inactividad para que los pitidos puedan escucharse.
 - Menu de ajustes para elegir modo y volumen entre 0% y 100%, con prueba sonora.
@@ -23,35 +24,37 @@ La ventana se cierra desde su icono en la barra de tareas o con `Alt+F4`. El men
 
 ### Widget en barra de tareas
 
-Descarga AutoPomodoro 1.6.0 desde [GitHub Releases](https://github.com/jstihl01/AutoPomodoro/releases/tag/v1.6.0)
-e instala `AutoPomodoro-Setup-v1.6.0.exe` sobre la version anterior.
+Descarga AutoPomodoro 2.0.0 desde [GitHub Releases](https://github.com/jstihl01/AutoPomodoro/releases/tag/v2.0.0)
+e instala `AutoPomodoro-Setup-v2.0.0.exe` sobre la version anterior.
 
-En Ajustes, el boton `MOSTRAR EN BARRA` cambia a un contador
-transparente junto al area de notificacion del monitor principal. El texto es
+El boton de minimizar de la ventana cambia a un contador dentro de una capsula
+negra redondeada junto al area de notificacion del monitor principal. El texto es
 verde para trabajo 25/5, rojo para trabajo 50/10 y azul durante el descanso.
 Pasar el cursor por el altavoz abre el volumen de AutoPomodoro con porcentaje;
 hacer clic silencia o restaura el ultimo volumen audible.
 
-El clic derecho permite volver a la ventana, cambiar el modo, desplazar el
-contador, abrir ajustes o salir. Se recuerdan la vista y el desplazamiento.
+El clic izquierdo en los numeros recupera la ventana. El engranaje abre los
+ajustes de modo y volumen, con botones y deslizadores redondeados.
+El altavoz esta a la izquierda e indica silencio o volumen bajo, medio y alto.
+El widget no tiene menu de clic derecho. Se recuerda la vista seleccionada.
 Volver a abrir AutoPomodoro desde su acceso directo recupera siempre la ventana.
 Los sonidos y la prevencion de suspension siguen funcionando en ambas vistas.
 
 Esta vista usa una ventana WPF vinculada a Explorer mediante Win32; no es un
 widget del panel Win+W y no reserva espacio ni desplaza los iconos de Windows.
-Puede ser necesario moverla con su menu para evitar solapamientos. Solo admite
-la barra horizontal principal. Se oculta con la barra y ante ventanas a pantalla
+Solo admite la barra horizontal principal y puede solaparse con iconos si no
+hay espacio disponible. Se oculta con la barra y ante ventanas a pantalla
 completa; si no encuentra una barra compatible vuelve a la ventana normal.
 El modo ventana permanece disponible como alternativa ante cambios de Windows.
 
-El instalador principal esta en `releases\AutoPomodoro-Setup-v1.6.0.exe`.
+El instalador principal esta en `releases\AutoPomodoro-Setup-v2.0.0.exe`.
 
 Ejecutalo para instalar AutoPomodoro. El instalador crea accesos en el escritorio y en el menu Inicio y no necesita permisos de administrador.
 
-El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. El archivo `AutoPomodoro-Setup-v1.6.0.exe.sha256` permite comprobar que el instalador no ha cambiado:
+El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. El archivo `AutoPomodoro-Setup-v2.0.0.exe.sha256` permite comprobar que el instalador no ha cambiado:
 
 ```powershell
-Get-FileHash .\releases\AutoPomodoro-Setup-v1.6.0.exe -Algorithm SHA256
+Get-FileHash .\releases\AutoPomodoro-Setup-v2.0.0.exe -Algorithm SHA256
 ```
 
 Volver a ejecutar el instalador reemplaza limpiamente la aplicacion y conserva la posicion y el tamano. La desinstalacion elimina tambien esos ajustes.
