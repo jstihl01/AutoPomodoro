@@ -21,12 +21,12 @@ La ventana se cierra desde su icono en la barra de tareas o con `Alt+F4`. El men
 
 ## Instalar
 
-### Vista experimental en barra de tareas (1.5.0 beta)
+### Widget en barra de tareas
 
-Descarga la beta desde [GitHub Releases](https://github.com/jstihl01/AutoPomodoro/releases/tag/v1.5.0-beta.1)
-e instala `AutoPomodoro-Setup-v1.5.0-beta.1.exe` sobre la version anterior.
+Descarga AutoPomodoro 1.6.0 desde [GitHub Releases](https://github.com/jstihl01/AutoPomodoro/releases/tag/v1.6.0)
+e instala `AutoPomodoro-Setup-v1.6.0.exe` sobre la version anterior.
 
-En Ajustes, el boton `MOSTRAR EN BARRA (EXPERIMENTAL)` cambia a un contador
+En Ajustes, el boton `MOSTRAR EN BARRA` cambia a un contador
 transparente junto al area de notificacion del monitor principal. El texto es
 verde para trabajo 25/5, rojo para trabajo 50/10 y azul durante el descanso.
 Pasar el cursor por el altavoz abre el volumen de AutoPomodoro con porcentaje;
@@ -42,17 +42,16 @@ widget del panel Win+W y no reserva espacio ni desplaza los iconos de Windows.
 Puede ser necesario moverla con su menu para evitar solapamientos. Solo admite
 la barra horizontal principal. Se oculta con la barra y ante ventanas a pantalla
 completa; si no encuentra una barra compatible vuelve a la ventana normal.
-La compatibilidad visual con Explorer, reinicios y distintas escalas de pantalla
-requiere verificacion manual antes de publicar esta beta como version estable.
+El modo ventana permanece disponible como alternativa ante cambios de Windows.
 
-El instalador principal esta en `releases\AutoPomodoro-Setup-v1.4.0.exe`.
+El instalador principal esta en `releases\AutoPomodoro-Setup-v1.6.0.exe`.
 
 Ejecutalo para instalar AutoPomodoro. El instalador crea accesos en el escritorio y en el menu Inicio y no necesita permisos de administrador.
 
-El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. El archivo `AutoPomodoro-Setup-v1.4.0.exe.sha256` permite comprobar que el instalador no ha cambiado:
+El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. El archivo `AutoPomodoro-Setup-v1.6.0.exe.sha256` permite comprobar que el instalador no ha cambiado:
 
 ```powershell
-Get-FileHash .\releases\AutoPomodoro-Setup-v1.4.0.exe -Algorithm SHA256
+Get-FileHash .\releases\AutoPomodoro-Setup-v1.6.0.exe -Algorithm SHA256
 ```
 
 Volver a ejecutar el instalador reemplaza limpiamente la aplicacion y conserva la posicion y el tamano. La desinstalacion elimina tambien esos ajustes.

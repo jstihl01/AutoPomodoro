@@ -1,6 +1,6 @@
 #define MyAppName "AutoPomodoro"
 #ifndef MyAppVersion
-#define MyAppVersion "1.5.0-beta.1"
+#define MyAppVersion "1.6.0"
 #endif
 #define MyAppPublisher "jstihl01"
 #define MyAppExeName "AutoPomodoro.exe"
@@ -9,7 +9,7 @@
 AppId={{AFA9B34B-028A-4BD3-9A99-48A27847A31B}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-VersionInfoVersion=1.5.0.0
+VersionInfoVersion=1.6.0.0
 AppPublisher={#MyAppPublisher}
 DefaultDirName={localappdata}\Programs\{#MyAppName}
 DefaultGroupName={#MyAppName}

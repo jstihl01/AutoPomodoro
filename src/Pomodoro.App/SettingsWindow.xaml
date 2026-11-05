@@ -162,7 +162,7 @@
             </Grid>
 
             <Button Grid.Row="7" Height="40" Margin="0,8"
-                    Content="MOSTRAR EN BARRA (EXPERIMENTAL)"
+                    Content="MOSTRAR EN BARRA"
                     Foreground="White" Background="#22FFFFFF" BorderBrush="#80FFFFFF"
                     FontSize="12" Cursor="Hand" Click="Taskbar_Click" />
 

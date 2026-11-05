@@ -15,7 +15,7 @@ internal static class TaskbarPlacement
         if (bar == 0 || !GetWindowRect(bar, out var bounds)) return Result.Unavailable;
         var tray = FindWindowEx(bar, 0, "TrayNotifyWnd", null);
         if (tray == 0 || !GetWindowRect(tray, out var trayBounds)) return Result.Unavailable;
-        // The current experimental layout supports a horizontal primary taskbar only.
+        // The current layout supports a horizontal primary taskbar only.
         if (bounds.Right - bounds.Left < bounds.Bottom - bounds.Top) return Result.Unavailable;
         var monitor = MonitorFromWindow(bar, 2);
         var info = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };

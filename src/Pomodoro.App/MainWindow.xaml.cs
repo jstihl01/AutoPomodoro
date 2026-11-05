@@ -38,7 +38,7 @@ public partial class MainWindow : Window
         _timer.Start();
         Loaded += (_, _) => { if (_settings.TaskbarMode) UseTaskbar(); };
         var menu = new System.Windows.Controls.ContextMenu();
-        var widgetItem = new System.Windows.Controls.MenuItem { Header = "Mostrar en barra de tareas (experimental)" };
+        var widgetItem = new System.Windows.Controls.MenuItem { Header = "Mostrar en barra de tareas" };
         widgetItem.Click += (_, _) => UseTaskbar();
         menu.Items.Add(widgetItem);
         ContextMenu = menu;
