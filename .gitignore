@@ -1,4 +1,6 @@
 artifacts/
+dist/
+releases/*.exe
 bin/
 obj/
 .vs/

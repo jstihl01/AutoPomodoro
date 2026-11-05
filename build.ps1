@@ -49,7 +49,7 @@ if (-not $compiler) {
 }
 
 New-Item -ItemType Directory -Path $releases -Force | Out-Null
-& $compiler (Join-Path $root 'installer\AutoPomodoro.iss')
+& $compiler "/DMyAppVersion=$version" (Join-Path $root 'installer\AutoPomodoro.iss')
 if ($LASTEXITCODE -ne 0) { throw 'Fallo al generar el instalador.' }
 
 $setup = Join-Path $releases $setupFileName

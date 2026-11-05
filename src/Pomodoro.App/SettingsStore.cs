@@ -10,7 +10,10 @@ internal readonly record struct WindowGeometry(double Left, double Top, double W
 internal readonly record struct AppSettings(
     WindowGeometry Geometry,
     int VolumePercent,
-    PomodoroMode Mode);
+    PomodoroMode Mode,
+    bool TaskbarMode = false,
+    int LastAudibleVolume = 60,
+    int TaskbarOffset = 0);
 
 internal static class SettingsStore
 {
@@ -51,7 +54,9 @@ internal static class SettingsStore
                     var mode = stored.Mode is PomodoroMode.Standard25_5 or PomodoroMode.Extended50_10
                         ? stored.Mode.Value
                         : PomodoroMode.Standard25_5;
-                    var settings = new AppSettings(geometry, volume, mode);
+                    var settings = new AppSettings(geometry, volume, mode, stored.TaskbarMode,
+                        Math.Clamp(stored.LastAudibleVolume ?? 60, 1, 100),
+                        Math.Clamp(stored.TaskbarOffset, 0, 4000));
                     if (sourcePath == LegacyFilePath)
                     {
                         Save(settings);
@@ -81,7 +86,10 @@ internal static class SettingsStore
             Width = settings.Geometry.Width,
             Height = settings.Geometry.Height,
             VolumePercent = Math.Clamp(settings.VolumePercent, 0, 100),
-            Mode = settings.Mode
+            Mode = settings.Mode,
+            TaskbarMode = settings.TaskbarMode,
+            LastAudibleVolume = settings.LastAudibleVolume,
+            TaskbarOffset = settings.TaskbarOffset
         };
 
         try
@@ -137,5 +145,8 @@ internal static class SettingsStore
         public double? Height { get; set; }
         public int? VolumePercent { get; set; }
         public PomodoroMode? Mode { get; set; }
+        public bool TaskbarMode { get; set; }
+        public int? LastAudibleVolume { get; set; }
+        public int TaskbarOffset { get; set; }
     }
 }

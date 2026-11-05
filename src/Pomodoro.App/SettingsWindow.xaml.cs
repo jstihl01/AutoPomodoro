@@ -25,6 +25,13 @@ public partial class SettingsWindow : Window
         : PomodoroMode.Standard25_5;
 
     internal event EventHandler? ResetWindowRequested;
+    internal event EventHandler? TaskbarRequested;
+
+    private void Taskbar_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+        TaskbarRequested?.Invoke(this, EventArgs.Empty);
+    }
 
     private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) =>
         UpdateVolumeText();
