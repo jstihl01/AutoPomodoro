@@ -28,7 +28,7 @@ public partial class TaskbarWidget : Window
             _popupTimer.Stop();
         };
         _placementTimer.Tick += (_, _) => Place();
-        Loaded += (_, _) => { Place(); _placementTimer.Start(); };
+        Loaded += (_, _) => { _placementTimer.Start(); Place(); };
         Closed += (_, _) => { _placementTimer.Stop(); _popupTimer.Stop(); VolumePopup.IsOpen = false; };
         KeyDown += (_, e) => { if (e.Key == Key.Escape) _controller.UseWindow(); };
     }

@@ -26,7 +26,7 @@ public partial class App : System.Windows.Application
         ShutdownMode = ShutdownMode.OnMainWindowClose;
         _singleInstance.ActivationRequested += (_, _) =>
             _mainWindow.Dispatcher.BeginInvoke(_mainWindow.BringToFront);
-        _mainWindow.Show();
+        _mainWindow.ShowSavedView();
         _singleInstance.StartListening();
     }
 

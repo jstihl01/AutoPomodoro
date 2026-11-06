@@ -1,5 +1,7 @@
 # AutoPomodoro para Windows 11
 
+[![Descargar AutoPomodoro para Windows](https://img.shields.io/badge/DESCARGAR-AutoPomodoro%20para%20Windows-1673C9?style=for-the-badge)](https://github.com/jstihl01/AutoPomodoro/releases/download/v2.0.1/AutoPomodoro-Setup-v2.0.1.exe)
+
 Temporizador Pomodoro de escritorio sincronizado con la hora real. AutoPomodoro permite trabajar con intervalos 25/5 o 50/10 sin iniciar, pausar ni reajustar manualmente el reloj.
 
 El icono propio de AutoPomodoro se integra en la aplicacion, la barra de tareas, los accesos directos y el instalador.
@@ -24,9 +26,6 @@ La ventana se cierra desde su icono en la barra de tareas o con `Alt+F4`. El men
 
 ### Widget en barra de tareas
 
-Descarga AutoPomodoro 2.0.0 desde [GitHub Releases](https://github.com/jstihl01/AutoPomodoro/releases/tag/v2.0.0)
-e instala `AutoPomodoro-Setup-v2.0.0.exe` sobre la version anterior.
-
 El boton de minimizar de la ventana cambia a un contador dentro de una capsula
 negra redondeada junto al area de notificacion del monitor principal. El texto es
 verde para trabajo 25/5, rojo para trabajo 50/10 y azul durante el descanso.
@@ -47,14 +46,12 @@ hay espacio disponible. Se oculta con la barra y ante ventanas a pantalla
 completa; si no encuentra una barra compatible vuelve a la ventana normal.
 El modo ventana permanece disponible como alternativa ante cambios de Windows.
 
-El instalador principal esta en `releases\AutoPomodoro-Setup-v2.0.0.exe`.
+Descarga el instalador con el botón del principio y ejecútalo para instalar o actualizar AutoPomodoro. Crea accesos en el escritorio y en el menú Inicio y no necesita permisos de administrador.
 
-Ejecutalo para instalar AutoPomodoro. El instalador crea accesos en el escritorio y en el menu Inicio y no necesita permisos de administrador.
-
-El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. El archivo `AutoPomodoro-Setup-v2.0.0.exe.sha256` permite comprobar que el instalador no ha cambiado:
+El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. Puedes comprobar el archivo descargado con el checksum de [GitHub Releases](https://github.com/jstihl01/AutoPomodoro/releases/latest):
 
 ```powershell
-Get-FileHash .\releases\AutoPomodoro-Setup-v2.0.0.exe -Algorithm SHA256
+Get-FileHash .\AutoPomodoro-Setup-v2.0.1.exe -Algorithm SHA256
 ```
 
 Volver a ejecutar el instalador reemplaza limpiamente la aplicacion y conserva la posicion y el tamano. La desinstalacion elimina tambien esos ajustes.

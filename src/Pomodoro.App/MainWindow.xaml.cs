@@ -33,7 +33,14 @@ public partial class MainWindow : Window
         _timer.Interval = TimeSpan.FromMilliseconds(100);
         _timer.Tick += (_, _) => UpdateTimer();
         _timer.Start();
-        Loaded += (_, _) => { if (_settings.TaskbarMode) UseTaskbar(); };
+    }
+
+    internal void ShowSavedView()
+    {
+        if (_settings.TaskbarMode)
+            UseTaskbar();
+        else
+            Show();
     }
 
     public void BringToFront()
@@ -184,7 +191,8 @@ public partial class MainWindow : Window
             _settingsWindow.Close();
         }
 
-        _settings = _settings with { Geometry = SettingsStore.GeometryOf(this) };
+        if (IsVisible)
+            _settings = _settings with { Geometry = SettingsStore.GeometryOf(this) };
         SettingsStore.Save(_settings);
     }
 
@@ -192,14 +200,15 @@ public partial class MainWindow : Window
     {
         if (_widget is not null) return;
         _settingsWindow?.Close();
-        _settings = _settings with { Geometry = SettingsStore.GeometryOf(this), TaskbarMode = true };
+        if (IsVisible)
+            _settings = _settings with { Geometry = SettingsStore.GeometryOf(this) };
+        _settings = _settings with { TaskbarMode = true };
         SettingsStore.Save(_settings);
         var widget = new TaskbarWidget(this);
         _widget = widget;
         UpdateTimer();
         widget.Show();
-        // Placement can reject this environment synchronously during Loaded.
-        if (_widget is not null) Hide();
+        if (_widget is not null && IsVisible) Hide();
     }
 
     internal void UseWindow()
