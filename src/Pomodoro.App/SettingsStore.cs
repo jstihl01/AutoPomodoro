@@ -1,140 +1,159 @@
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
-using System.Windows;
 using Pomodoro.Core;
 
 namespace Pomodoro.App;
 
-internal readonly record struct WindowGeometry(double Left, double Top, double Width, double Height);
+internal readonly record struct WindowGeometry(double Left, double Top, double Width, double Height, double? PositionScale = null);
 
 internal readonly record struct AppSettings(
     WindowGeometry Geometry,
     int VolumePercent,
     PomodoroMode Mode,
     bool TaskbarMode = false,
-    int LastAudibleVolume = 60,
-    int TaskbarOffset = 0);
+    int LastAudibleVolume = SettingsStore.DefaultVolumePercent,
+    int TaskbarOffset = 0)
+{
+    public AppSettings WithVolume(int percent)
+    {
+        var volume = Math.Clamp(percent, 0, 100);
+        return this with { VolumePercent = volume, LastAudibleVolume = volume > 0 ? volume : LastAudibleVolume };
+    }
+}
 
-internal static class SettingsStore
+internal enum SettingsSaveResult { Saved, ReadProtected, Failed }
+
+internal sealed class SettingsStore(string profileDirectory, Func<WindowGeometry> defaultGeometry)
 {
     public const int DefaultVolumePercent = 60;
-    private const double DefaultSize = 320;
-    private const double Margin = 24;
-    private static readonly string LocalAppData =
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-    private static readonly string DirectoryPath = Path.Combine(
-        LocalAppData, "AutoPomodoro");
-    private static readonly string FilePath = Path.Combine(DirectoryPath, "settings.json");
-    private static readonly string LegacyFilePath = Path.Combine(LocalAppData, "Pomodoro", "settings.json");
+    internal const int MaximumFileBytes = 64 * 1024;
 
-    public static AppSettings Defaults() =>
-        new(DefaultGeometry(), DefaultVolumePercent, PomodoroMode.Standard25_5);
+    private readonly string _path = Path.Combine(profileDirectory, "AutoPomodoro", "settings.json");
+    private readonly string _legacy = Path.Combine(profileDirectory, "Pomodoro", "settings.json");
+    private bool _readProtected;
+    private bool _recovered;
 
-    public static AppSettings Load()
+    public static SettingsStore ForCurrentUser() =>
+        new(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), WindowPosition.Default);
+
+    public AppSettings Defaults() => new(defaultGeometry(), DefaultVolumePercent, PomodoroMode.Standard25_5);
+
+    public (AppSettings Settings, bool Migrate, bool ReadWarning) Load()
     {
+        _recovered = false;
+        var current = Read(_path);
+        _readProtected = current.Failed;
+        if (current.Settings is { } saved)
+            return (saved, false, false);
+
+        var backup = Read(_path + ".bak");
+        var legacy = backup.Settings is null ? Read(_legacy) : default;
+        var fallback = backup.Settings ?? legacy.Settings;
+        _recovered = fallback.HasValue;
+        _readProtected |= fallback is null && (backup.Failed || legacy.Failed);
+        return (fallback ?? Defaults(), _recovered && !_readProtected, _readProtected);
+    }
+
+    public SettingsSaveResult Save(AppSettings settings, bool explicitChange = false, bool reset = false)
+    {
+        if (_readProtected && !reset && !(_recovered && explicitChange))
+            return SettingsSaveResult.ReadProtected;
+
+        var id = Guid.NewGuid().ToString("N");
+        var temporary = $"{_path}.{id}.tmp";
+        var ownsTemporary = false;
         try
         {
-            var sourcePath = File.Exists(FilePath) ? FilePath : LegacyFilePath;
-            if (File.Exists(sourcePath))
+            Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+            using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
-                var stored = JsonSerializer.Deserialize<StoredSettings>(File.ReadAllText(sourcePath));
-                if (stored is not null)
-                {
-                    var geometry = new WindowGeometry(
-                        stored.Left ?? double.NaN,
-                        stored.Top ?? double.NaN,
-                        stored.Width ?? double.NaN,
-                        stored.Height ?? double.NaN);
-                    if (!IsValid(geometry) || !IsVisible(geometry))
-                    {
-                        geometry = DefaultGeometry();
-                    }
+                ownsTemporary = true;
+                JsonSerializer.Serialize(stream, Store(settings));
+                stream.Flush(flushToDisk: true);
+            }
 
-                    var volume = Math.Clamp(stored.VolumePercent ?? DefaultVolumePercent, 0, 100);
-                    var mode = stored.Mode is PomodoroMode.Standard25_5 or PomodoroMode.Extended50_10
-                        ? stored.Mode.Value
-                        : PomodoroMode.Standard25_5;
-                    var settings = new AppSettings(geometry, volume, mode, stored.TaskbarMode,
-                        Math.Clamp(stored.LastAudibleVolume ?? 60, 1, 100),
-                        Math.Clamp(stored.TaskbarOffset, 0, 4000));
-                    if (sourcePath == LegacyFilePath)
-                    {
-                        Save(settings);
-                    }
-                    return settings;
+            // Keep an unreadable original separately so it never replaces a valid backup.
+            var backup = _readProtected ? $"{_path}.{id}.recovered" : _path + ".bak";
+            try
+            {
+                File.Replace(temporary, _path, backup);
+            }
+            catch (FileNotFoundException)
+            {
+                File.Move(temporary, _path);
+            }
+            ownsTemporary = false;
+            _readProtected = false;
+            return SettingsSaveResult.Saved;
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            Trace.TraceWarning("AutoPomodoro: guardar ajustes ({0}, 0x{1:X8})", error.GetType().Name, error.HResult);
+            return SettingsSaveResult.Failed;
+        }
+        finally
+        {
+            if (ownsTemporary)
+            {
+                try { File.Delete(temporary); }
+                catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+                {
+                    Trace.TraceWarning("AutoPomodoro: limpiar temporal de ajustes (0x{0:X8})", error.HResult);
                 }
             }
         }
-        catch (IOException) { }
-        catch (JsonException) { }
-        catch (UnauthorizedAccessException) { }
-
-        return Defaults();
     }
 
-    public static void Save(AppSettings settings)
+    private (AppSettings? Settings, bool Failed) Read(string path)
     {
-        if (!IsValid(settings.Geometry))
-        {
-            return;
-        }
-
-        var stored = new StoredSettings
-        {
-            Left = settings.Geometry.Left,
-            Top = settings.Geometry.Top,
-            Width = settings.Geometry.Width,
-            Height = settings.Geometry.Height,
-            VolumePercent = Math.Clamp(settings.VolumePercent, 0, 100),
-            Mode = settings.Mode,
-            TaskbarMode = settings.TaskbarMode,
-            LastAudibleVolume = settings.LastAudibleVolume,
-            TaskbarOffset = settings.TaskbarOffset
-        };
-
         try
         {
-            Directory.CreateDirectory(DirectoryPath);
-            var temporaryPath = FilePath + ".tmp";
-            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(stored));
-            File.Move(temporaryPath, FilePath, true);
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            if (stream.Length > MaximumFileBytes) throw new InvalidDataException("Archivo de ajustes demasiado grande.");
+            var buffer = new byte[MaximumFileBytes + 1];
+            var size = stream.ReadAtLeast(buffer, buffer.Length, false);
+            if (size > MaximumFileBytes) throw new InvalidDataException("Archivo de ajustes demasiado grande.");
+            var json = buffer.AsSpan(0, size);
+            if (json.StartsWith("\uFEFF"u8)) json = json[3..];
+            var stored = JsonSerializer.Deserialize<StoredSettings>(json);
+            if (stored is null || (stored.Width is null && stored.Height is null && stored.VolumePercent is null && stored.Mode is null))
+                throw new InvalidDataException("Formato de ajustes desconocido.");
+
+            var geometry = new WindowGeometry(
+                stored.Left ?? double.NaN, stored.Top ?? double.NaN,
+                stored.Width ?? double.NaN, stored.Height ?? double.NaN, stored.PositionScale);
+            var volume = Math.Clamp(stored.VolumePercent ?? DefaultVolumePercent, 0, 100);
+            var mode = stored.Mode is PomodoroMode.Extended50_10 ? PomodoroMode.Extended50_10 : PomodoroMode.Standard25_5;
+            var lastAudible = volume > 0 ? volume : Math.Clamp(stored.LastAudibleVolume ?? DefaultVolumePercent, 1, 100);
+            return (new AppSettings(Normalize(geometry), volume, mode, stored.TaskbarMode,
+                lastAudible, Math.Clamp(stored.TaskbarOffset, 0, 4000)), false);
         }
-        catch (IOException) { }
-        catch (UnauthorizedAccessException) { }
+        catch (Exception error) when (error is FileNotFoundException or DirectoryNotFoundException)
+        {
+            return (null, false);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException or InvalidDataException)
+        {
+            Trace.TraceWarning("AutoPomodoro: leer ajustes{0} ({1}, 0x{2:X8})",
+                path == _legacy ? " heredados" : path == _path ? "" : " de respaldo", error.GetType().Name, error.HResult);
+            return (null, true);
+        }
     }
 
-    public static WindowGeometry GeometryOf(Window window)
-    {
-        var bounds = window.RestoreBounds;
-        return new WindowGeometry(bounds.Left, bounds.Top, bounds.Width, bounds.Height);
-    }
+    private WindowGeometry Normalize(WindowGeometry geometry) =>
+        WindowPosition.IsValid(geometry) ? geometry : defaultGeometry();
 
-    private static WindowGeometry DefaultGeometry()
+    private StoredSettings Store(AppSettings settings)
     {
-        var area = SystemParameters.WorkArea;
-        return new WindowGeometry(
-            area.Right - DefaultSize - Margin,
-            area.Top + Margin,
-            DefaultSize,
-            DefaultSize);
-    }
-
-    private static bool IsValid(WindowGeometry value) =>
-        double.IsFinite(value.Left) && double.IsFinite(value.Top) &&
-        double.IsFinite(value.Width) && double.IsFinite(value.Height) &&
-        value.Width >= 220 && value.Height >= 180 &&
-        value.Width <= 4000 && value.Height <= 4000;
-
-    private static bool IsVisible(WindowGeometry value)
-    {
-        var virtualScreen = new Rect(
-            SystemParameters.VirtualScreenLeft,
-            SystemParameters.VirtualScreenTop,
-            SystemParameters.VirtualScreenWidth,
-            SystemParameters.VirtualScreenHeight);
-        var window = new Rect(value.Left, value.Top, value.Width, value.Height);
-        window.Intersect(virtualScreen);
-        return window.Width >= 80 && window.Height >= 80;
+        var geometry = Normalize(settings.Geometry);
+        return new StoredSettings
+        {
+            Left = geometry.Left, Top = geometry.Top, Width = geometry.Width, Height = geometry.Height,
+            PositionScale = geometry.PositionScale, VolumePercent = settings.VolumePercent,
+            Mode = settings.Mode, TaskbarMode = settings.TaskbarMode, LastAudibleVolume = settings.LastAudibleVolume,
+            TaskbarOffset = settings.TaskbarOffset
+        };
     }
 
     private sealed class StoredSettings
@@ -143,6 +162,7 @@ internal static class SettingsStore
         public double? Top { get; set; }
         public double? Width { get; set; }
         public double? Height { get; set; }
+        public double? PositionScale { get; set; }
         public int? VolumePercent { get; set; }
         public PomodoroMode? Mode { get; set; }
         public bool TaskbarMode { get; set; }

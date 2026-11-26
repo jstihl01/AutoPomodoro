@@ -2,22 +2,32 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Pomodoro.App"
-        Title="AutoPomodoro — barra de tareas" Width="114" Height="36" UseLayoutRounding="True"
+        Title="AutoPomodoro — barra de tareas" Width="146" Height="38" UseLayoutRounding="True"
         WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
-        Background="Transparent" ShowInTaskbar="False" ShowActivated="False">
+        Background="Transparent" ShowInTaskbar="False" ShowActivated="False" Topmost="True">
     <Border Background="Black" CornerRadius="11" Padding="5,0">
     <Grid>
-        <Grid.ColumnDefinitions><ColumnDefinition Width="28"/><ColumnDefinition Width="4"/><ColumnDefinition/></Grid.ColumnDefinitions>
-        <Button x:Name="VolumeButton" Style="{StaticResource IconButton}" Width="28" Height="30" Padding="2"
-                Foreground="{Binding Foreground, ElementName=Countdown}" Click="ToggleMute" MouseEnter="ShowVolume"
-                AutomationProperties.AutomationId="WidgetVolumeButton" AutomationProperties.Name="Silenciar o activar sonido">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="30"/><ColumnDefinition/><ColumnDefinition Width="14"/></Grid.ColumnDefinitions>
+        <ToggleButton x:Name="VolumeButton" Style="{StaticResource SpeakerToggle}" Width="28" Height="30" Padding="2"
+                Foreground="{Binding Foreground, ElementName=Countdown}" Checked="MuteChanged" Unchecked="MuteChanged" MouseEnter="ShowVolume"
+                ToolTip="Silenciar o activar sonido (F2 para ajustar el volumen)"
+                AutomationProperties.AutomationId="WidgetVolumeButton" AutomationProperties.Name="Silenciar AutoPomodoro"
+                AutomationProperties.HelpText="Pulsa F2 para enfocar el deslizador de volumen" AutomationProperties.AcceleratorKey="F2">
             <local:VolumeIcon x:Name="Speaker" Foreground="{Binding Foreground, ElementName=Countdown}"/>
-        </Button>
-        <Button Grid.Column="2" Style="{StaticResource IconButton}" Width="Auto" Height="34" Padding="0" Click="OpenWindow"
+        </ToggleButton>
+        <Button x:Name="OpenWindowButton" Grid.Column="1" Style="{StaticResource IconButton}" Width="Auto" Height="Auto" Padding="0" Click="OpenWindow"
                 AutomationProperties.AutomationId="WidgetCountdown" AutomationProperties.Name="Abrir AutoPomodoro como ventana">
-            <TextBlock x:Name="Countdown" Text="25:00" FontFamily="Consolas" FontSize="23" FontWeight="Normal"
-                       VerticalAlignment="Center" TextAlignment="Center" Typography.NumeralAlignment="Tabular"/>
+            <Viewbox StretchDirection="DownOnly">
+                <StackPanel>
+                    <TextBlock x:Name="Countdown" FontFamily="Consolas" FontSize="21" TextAlignment="Center"/>
+                    <TextBlock x:Name="Phase" Foreground="White" FontSize="10.5" FontWeight="SemiBold"
+                               TextAlignment="Center" LineHeight="12" LineStackingStrategy="BlockLineHeight"/>
+                </StackPanel>
+            </Viewbox>
         </Button>
+        <TextBlock x:Name="StatusBadge" Grid.Column="2" Text="!" Foreground="#FFD464" FontWeight="Bold"
+                   VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"
+                   ToolTipService.ShowDuration="15000" AutomationProperties.LiveSetting="Polite"/>
         <Popup x:Name="VolumePopup" PlacementTarget="{Binding ElementName=VolumeButton}" Placement="Top"
                AllowsTransparency="True" StaysOpen="True">
             <Border x:Name="VolumePanel" Background="#171717" CornerRadius="14" Padding="16"

@@ -5,20 +5,27 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,24" MouseLeftButtonDown="Surface_MouseLeftButtonDown">
             <TextBlock Text="AJUSTES" FontWeight="SemiBold" FontSize="26" Margin="0,0,0,24"/>
+            <TextBlock x:Name="SaveStatus" Foreground="White" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,16"
+                       Visibility="Collapsed" AutomationProperties.LiveSetting="Polite"/>
             <TextBlock Text="VOLUMEN" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,10"/>
-            <Grid Margin="0,0,0,24">
+            <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition/><ColumnDefinition Width="54"/></Grid.ColumnDefinitions>
-                <Button Style="{StaticResource IconButton}" ToolTip="Probar volumen" Click="TestVolume_Click" AutomationProperties.Name="Probar volumen"><local:VolumeIcon Volume="{Binding Value, ElementName=VolumeSlider}" Foreground="White"/></Button>
+                <Button Style="{StaticResource IconButton}" ToolTip="Probar volumen" Click="TestVolume_Click"
+                        AutomationProperties.AutomationId="TestVolume" AutomationProperties.Name="Probar volumen"><local:VolumeIcon Volume="{Binding Value, ElementName=VolumeSlider}" Foreground="White"/></Button>
                 <Slider x:Name="VolumeSlider" Grid.Column="1" Style="{StaticResource VolumeSlider}" VerticalAlignment="Center" ValueChanged="VolumeSlider_ValueChanged" AutomationProperties.AutomationId="SettingsVolume" AutomationProperties.Name="Volumen"/>
                 <TextBlock x:Name="VolumePercentText" Grid.Column="2" Text="60%" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Right" VerticalAlignment="Center"/>
             </Grid>
+            <TextBlock x:Name="TestStatus" Foreground="White" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0"
+                       Visibility="Collapsed" AutomationProperties.LiveSetting="Polite"/>
+            <Border Height="24"/>
             <TextBlock Text="MODO" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,12"/>
             <Grid Margin="0,0,0,24">
                 <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
                 <RadioButton x:Name="StandardMode" Content="25 / 5" Background="#24985B" GroupName="Mode" Style="{StaticResource ModeButton}" AutomationProperties.AutomationId="Mode25"/>
                 <RadioButton x:Name="ExtendedMode" Grid.Column="2" Content="50 / 10" Background="#C6384E" GroupName="Mode" Style="{StaticResource ModeButton}" AutomationProperties.AutomationId="Mode50"/>
             </Grid>
-            <Button Content="RESTABLECER AJUSTES" Style="{StaticResource RoundedButton}" Click="Reset_Click" Margin="0,0,0,10"/>
+            <Button Content="RESTABLECER AJUSTES" Style="{StaticResource RoundedButton}" Click="Reset_Click" Margin="0,0,0,10"
+                    AutomationProperties.AutomationId="ResetSettings"/>
             <Button Content="LISTO" Style="{StaticResource RoundedButton}" Foreground="#174B80" Background="White" Click="Done_Click" AutomationProperties.AutomationId="SettingsDone"/>
         </StackPanel>
     </ScrollViewer>

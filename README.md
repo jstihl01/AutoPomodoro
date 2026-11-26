@@ -2,74 +2,60 @@
 
 [![Descargar AutoPomodoro para Windows](https://img.shields.io/badge/DESCARGAR-AutoPomodoro%20para%20Windows-1673C9?style=for-the-badge)](https://github.com/jstihl01/AutoPomodoro/releases/download/v2.0.1/AutoPomodoro-Setup-v2.0.1.exe)
 
-Temporizador Pomodoro de escritorio sincronizado con la hora real. AutoPomodoro permite trabajar con intervalos 25/5 o 50/10 sin iniciar, pausar ni reajustar manualmente el reloj.
-
-El icono propio de AutoPomodoro se integra en la aplicacion, la barra de tareas, los accesos directos y el instalador.
-
-## Funcionamiento
-
-- Modo 25/5: trabajo de `:00` a `:25` y de `:30` a `:55`; descanso durante los cinco minutos restantes de cada media hora.
-- Modo 50/10: trabajo de `:00` a `:50`; descanso durante los diez minutos restantes de cada hora.
-- Colores planos: verde durante el trabajo 25/5, rojo durante el trabajo 50/10 y azul durante el descanso.
-- Contador monoespaciado Consolas con ancho estable en ventana y widget.
-- Siempre visible sobre las ventanas normales, redimensionable y sin barra superior ni boton de cierre.
-- Mientras esta abierta, mantiene la pantalla encendida y evita la suspension por inactividad para que los pitidos puedan escucharse.
-- Menu de ajustes para elegir modo y volumen entre 0% y 100%, con prueba sonora.
-- Boton para restablecer volumen, modo, tamano y posicion a sus valores predeterminados.
-- Un tono suave al comenzar el descanso y tres tonos al volver al trabajo.
-- Una sola instancia y ninguna ejecucion en segundo plano al cerrar.
-- Recuerda tamano, posicion, modo y volumen en `%LocalAppData%\AutoPomodoro\settings.json` y migra automaticamente los ajustes de versiones anteriores.
-
-La ventana se cierra desde su icono en la barra de tareas o con `Alt+F4`. El menu se cierra con el boton `LISTO` o la tecla `Esc`; al cerrarlo guarda los cambios.
+Temporizador Pomodoro de escritorio sincronizado con la hora local de Windows. Abre la aplicación y el contador se ajusta a la fase que corresponda.
 
 ## Instalar
 
-### Widget en barra de tareas
+El botón descarga la versión estable 2.0.1 para Windows 11 x64. El instalador funciona por usuario y crea accesos en el escritorio y en el menú Inicio. Volver a ejecutarlo actualiza la aplicación y conserva los ajustes.
 
-El boton de minimizar de la ventana cambia a un contador dentro de una capsula
-negra redondeada junto al area de notificacion del monitor principal. El texto es
-verde para trabajo 25/5, rojo para trabajo 50/10 y azul durante el descanso.
-Pasar el cursor por el altavoz abre el volumen de AutoPomodoro con porcentaje;
-hacer clic silencia o restaura el ultimo volumen audible.
-
-El clic izquierdo en los numeros recupera la ventana. El engranaje abre los
-ajustes de modo y volumen, con botones y deslizadores redondeados.
-El altavoz esta a la izquierda e indica silencio o volumen bajo, medio y alto.
-El widget no tiene menu de clic derecho. Se recuerda la vista seleccionada.
-Volver a abrir AutoPomodoro desde su acceso directo recupera siempre la ventana.
-Los sonidos y la prevencion de suspension siguen funcionando en ambas vistas.
-
-Esta vista usa una ventana WPF vinculada a Explorer mediante Win32; no es un
-widget del panel Win+W y no reserva espacio ni desplaza los iconos de Windows.
-Solo admite la barra horizontal principal y puede solaparse con iconos si no
-hay espacio disponible. Se oculta con la barra y ante ventanas a pantalla
-completa; si no encuentra una barra compatible vuelve a la ventana normal.
-El modo ventana permanece disponible como alternativa ante cambios de Windows.
-
-Descarga el instalador con el botón del principio y ejecútalo para instalar o actualizar AutoPomodoro. Crea accesos en el escritorio y en el menú Inicio y no necesita permisos de administrador.
-
-El instalador no esta firmado porque el proyecto no dispone de un certificado de firma de codigo. Windows SmartScreen puede mostrar una advertencia. Puedes comprobar el archivo descargado con el checksum de [GitHub Releases](https://github.com/jstihl01/AutoPomodoro/releases/latest):
+Windows SmartScreen puede advertir que el instalador 2.0.1 carece de firma Authenticode. Para comprobar la integridad de la descarga, compara el resultado con el [SHA-256 de v2.0.1](https://github.com/jstihl01/AutoPomodoro/releases/download/v2.0.1/AutoPomodoro-Setup-v2.0.1.exe.sha256). El SHA-256 verifica el archivo, mientras que la firma Authenticode identifica al editor.
 
 ```powershell
 Get-FileHash .\AutoPomodoro-Setup-v2.0.1.exe -Algorithm SHA256
 ```
 
-Volver a ejecutar el instalador reemplaza limpiamente la aplicacion y conserva la posicion y el tamano. La desinstalacion elimina tambien esos ajustes.
+Desde 2.0.2, la desinstalación retira solo los archivos de ajustes propios de `%LocalAppData%\AutoPomodoro` y elimina la carpeta si queda vacía. La carpeta heredada `%LocalAppData%\Pomodoro` se conserva íntegra. La versión 2.0.1 elimina ambas carpetas completas al desinstalar.
+
+## Funcionamiento
+
+- **25/5**. Trabajo de `:00` a `:25` y de `:30` a `:55`, con fondo verde. Los descansos son azules.
+- **50/10**. Trabajo de `:00` a `:50`, con fondo rojo. Los últimos diez minutos de la hora son de descanso.
+- Un tono suave al comenzar el descanso y tres tonos al volver al trabajo. Se recalcula la fase en silencio al abrir la app, cambiar de modo o cambiar la hora del sistema.
+- La ventana es redimensionable y permanece encima de las ventanas normales. Ciérrala con `Alt+F4` o desde la barra de tareas.
+- En Ajustes se eligen el modo y el volumen. El altavoz reproduce una prueba con el volumen seleccionado. Al pulsar **LISTO** o `Esc`, se aplican y se guardan los cambios. **Restablecer ajustes** devuelve también el tamaño y la posición originales.
+- La app solicita a Windows que mantenga el equipo y la pantalla activos mientras está abierta. Los problemas de audio, energía y guardado se indican en la vista activa.
+
+### Widget en la barra de tareas
+
+- **Mostrar en barra de tareas** sustituye la ventana por una cápsula junto al área de notificación. La cápsula indica la fase por escrito y muestra `25/5` o `50/10` durante el trabajo.
+- Pasa el puntero por el altavoz para abrir el volumen. Púlsalo para silenciar o restaurar el último valor audible. Con el teclado, activa **Mostrar en barra de tareas** desde la ventana y pulsa `F2` en el widget para enfocar el deslizador. `Esc` devuelve el foco al altavoz.
+- Pulsa el contador para recuperar la ventana principal. Allí está el engranaje de **Ajustes**, en la esquina superior derecha. También puedes recuperar la ventana al abrir el acceso directo de nuevo.
+- `Alt+F4` desde el widget cierra AutoPomodoro. El contador y los avisos funcionan en ambas vistas.
+- El widget es una ventana independiente que se coloca sobre la barra horizontal principal. Comparte espacio con sus iconos y se oculta con la barra o ante una ventana a pantalla completa. Si la barra deja de estar disponible, se recupera la ventana principal y se conserva la vista preferida para el próximo arranque.
+
+Los ajustes se guardan en `%LocalAppData%\AutoPomodoro\settings.json`. Si hay una lectura fallida, la app conserva el archivo y busca un respaldo o los ajustes heredados. Tras un fallo de guardado puedes reintentar al pulsar **LISTO** en Ajustes. AutoPomodoro avisa antes de salir si quedan cambios pendientes.
 
 ## Compilar
 
-Requisitos para desarrollo:
-
-- SDK de .NET 8
-- Inno Setup 6
 - Windows 11 x64
+- SDK de .NET 10 indicado en `global.json`
+- Inno Setup 6.3.0 o posterior
+- Git
 
 ```powershell
-.\build.ps1
+.\build.ps1 -TestInstaller
 ```
 
-El script restaura y compila la solucion, ejecuta las pruebas, publica una aplicacion autocontenida y genera el instalador versionado y su checksum en `releases\`.
+El script comprueba el compilador de Inno Setup antes de compilar, ejecuta las pruebas de reloj e integración WPF y comprueba el arranque y el runtime del ejecutable autocontenido. `-TestInstaller` añade la instalación, reinstalación y desinstalación en rutas temporales con un identificador distinto. Los artefactos quedan en `releases\` con el número de versión en el nombre. Conserva juntos el instalador, su SHA-256 y el archivo `.build.json`, que registra el commit, el estado de las fuentes, el SDK, Inno Setup y los runtimes incluidos.
+
+Para una entrega firmada, prepara un commit limpio, un certificado de firma de código con clave privada en `CurrentUser\My` y el `signtool.exe` del SDK de Windows.
+
+```powershell
+.\build.ps1 -TestInstaller -Release -SignTool 'C:\ruta\signtool.exe' -CertificateThumbprint '<huella>'
+```
+
+Ese modo verifica la firma y el sello de tiempo del instalador y del desinstalador antes de generar el checksum. Vuelve a compilar y distribuir la aplicación al incorporar parches del runtime autocontenido. Actualiza el instalador y el checksum del README a la misma etiqueta de GitHub y publica el manifiesto de la misma compilación.
 
 ## Privacidad y limitaciones
 
-La aplicacion no usa red, cuentas, telemetria ni bandeja del sistema. Mientras esta abierta solicita a Windows mantener el equipo despierto y la pantalla encendida, pero no puede impedir bloqueos manuales, politicas corporativas, bateria critica o suspension forzada. La opcion "siempre visible" se aplica al escritorio normal de Windows; las pantallas seguras del sistema y algunas aplicaciones a pantalla completa pueden mostrarse por encima.
+La aplicación funciona sin red, cuentas ni telemetría. Windows conserva el control sobre los bloqueos manuales, las políticas de energía, los protectores de pantalla y la suspensión forzada. La superposición se aplica al escritorio normal.

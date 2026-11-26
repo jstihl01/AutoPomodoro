@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Pomodoro.App;
@@ -9,19 +10,22 @@ internal sealed class SystemSleepGuard : IDisposable
         ExecutionState.EsSystemRequired |
         ExecutionState.EsDisplayRequired;
 
-    private bool _active;
+    public bool Active { get; private set; }
 
-    public SystemSleepGuard()
+    public void TryAcquire()
     {
-        _active = SetThreadExecutionState(AwakeState) != 0;
+        if (Active) return;
+        Active = SetThreadExecutionState(AwakeState) != 0;
+        if (!Active) Trace.TraceWarning("AutoPomodoro: Windows rechazo la solicitud de energia.");
     }
 
     public void Dispose()
     {
-        if (_active)
+        if (Active)
         {
-            SetThreadExecutionState(ExecutionState.EsContinuous);
-            _active = false;
+            if (SetThreadExecutionState(ExecutionState.EsContinuous) == 0)
+                Trace.TraceWarning("AutoPomodoro: no se pudo liberar la solicitud de energia.");
+            Active = false;
         }
     }
 

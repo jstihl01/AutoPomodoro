@@ -1,64 +1,135 @@
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using Pomodoro.Core;
 
 namespace Pomodoro.App;
 
-internal sealed class TransitionSoundPlayer
+internal enum SoundKind { WorkFinished, RestFinished, Test }
+internal enum PlaybackResult { Played, Muted, Busy, Cancelled, Failed }
+
+internal sealed class TransitionSoundPlayer(Func<SoundKind, int, bool>? playback = null) : IDisposable
 {
     private const uint SoundMemory = 0x0004;
     private const uint SoundNodefault = 0x0002;
     private const uint SoundSync = 0x0000;
-    private readonly SemaphoreSlim _playback = new(1, 1);
+    private readonly object _gate = new();
+    private Request? _alert;
+    private Request? _preview;
+    private bool _playingPreview;
+    private bool _running;
+    private bool _disposed;
 
-    public void PlayWorkFinished(int volumePercent) =>
-        QueuePlayback(volumePercent, () => Play(CreateTone(523.25, 700, Volume(volumePercent, 8.10))));
+    public event Action<PlaybackResult>? TransitionCompleted;
 
-    public void PlayRestFinished(int volumePercent) => QueuePlayback(volumePercent, () =>
+    public void PlayTransition(PomodoroPhase newPhase, int volume)
     {
-        var tone = CreateTone(659.25, 170, Volume(volumePercent, 6.75));
-        for (var i = 0; i < 3; i++)
+        if (volume <= 0) return;
+        lock (_gate)
         {
-            Play(tone);
-            if (i < 2)
+            if (_disposed) return;
+            _alert = new Request(newPhase == PomodoroPhase.Rest ? SoundKind.WorkFinished : SoundKind.RestFinished, volume);
+            StartWorker();
+        }
+    }
+
+    public Task<PlaybackResult> PlayTest(int volume)
+    {
+        if (volume <= 0) return Task.FromResult(PlaybackResult.Muted);
+        lock (_gate)
+        {
+            if (_disposed) return Task.FromResult(PlaybackResult.Cancelled);
+            if (_playingPreview || _preview is not null) return Task.FromResult(PlaybackResult.Busy);
+            var completion = new TaskCompletionSource<PlaybackResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _preview = new Request(SoundKind.Test, volume, completion);
+            StartWorker();
+            return completion.Task;
+        }
+    }
+
+    public void CancelTests()
+    {
+        lock (_gate)
+        {
+            _preview?.Completion?.TrySetResult(PlaybackResult.Cancelled);
+            _preview = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        lock (_gate)
+        {
+            _disposed = true;
+            _alert = null;
+            CancelTests();
+        }
+    }
+
+    private void StartWorker()
+    {
+        if (_running) return;
+        _running = true;
+        _ = Task.Run(ProcessQueue);
+    }
+
+    private void ProcessQueue()
+    {
+        while (true)
+        {
+            Request request;
+            lock (_gate)
             {
-                Thread.Sleep(130);
+                if ((_alert ?? _preview) is not { } next)
+                {
+                    _running = false;
+                    return;
+                }
+                request = next;
+                _playingPreview = next.Kind == SoundKind.Test;
+                if (_playingPreview) _preview = null;
+                else _alert = null;
             }
-        }
-    });
 
-    public void PlayTest(int volumePercent) =>
-        QueuePlayback(volumePercent, () => Play(CreateTone(659.25, 170, Volume(volumePercent, 6.75))));
-
-    private void QueuePlayback(int volumePercent, Action playback)
-    {
-        if (volumePercent <= 0)
-        {
-            return;
-        }
-
-        _ = Task.Run(async () =>
-        {
-            await _playback.WaitAsync();
+            var result = PlaybackResult.Failed;
             try
             {
-                playback();
+                if ((playback ?? PlayNative)(request.Kind, request.Volume))
+                    result = PlaybackResult.Played;
+                else
+                    Trace.TraceWarning("AutoPomodoro: Windows rechazo el sonido {0}.", request.Kind);
             }
-            finally
+            catch (Exception error)
             {
-                _playback.Release();
+                Trace.TraceWarning("AutoPomodoro: reproducir {0} ({1}, 0x{2:X8})", request.Kind, error.GetType().Name, error.HResult);
             }
-        });
+
+            lock (_gate) _playingPreview = false;
+            if (request.Completion is { } completion)
+                completion.TrySetResult(result);
+            else
+                TransitionCompleted?.Invoke(result);
+        }
     }
+
+    private readonly record struct Request(SoundKind Kind, int Volume, TaskCompletionSource<PlaybackResult>? Completion = null);
+
+    private static bool PlayNative(SoundKind kind, int volume) => kind switch
+    {
+        SoundKind.WorkFinished => Play(CreateTone(523.25, 700, Volume(volume, 8.10))),
+        SoundKind.RestFinished => Play(CreateTone(659.25, 170, Volume(volume, 6.75), 3)),
+        _ => Play(CreateTone(659.25, 170, Volume(volume, 6.75)))
+    };
 
     private static double Volume(int volumePercent, double maximum) =>
         Math.Clamp(volumePercent, 0, 100) / 100d * maximum;
 
-    private static void Play(byte[] wave)
+    private static bool Play(byte[] wave)
     {
         var handle = GCHandle.Alloc(wave, GCHandleType.Pinned);
         try
         {
-            PlaySound(handle.AddrOfPinnedObject(), IntPtr.Zero, SoundMemory | SoundNodefault | SoundSync);
+            return PlaySound(handle.AddrOfPinnedObject(), IntPtr.Zero, SoundMemory | SoundNodefault | SoundSync);
         }
         finally
         {
@@ -66,13 +137,14 @@ internal sealed class TransitionSoundPlayer
         }
     }
 
-    private static byte[] CreateTone(double frequency, int durationMilliseconds, double volume)
+    private static byte[] CreateTone(double frequency, int durationMilliseconds, double volume, int repetitions = 1)
     {
         const int sampleRate = 44_100;
         const short channels = 1;
         const short bitsPerSample = 16;
         var sampleCount = sampleRate * durationMilliseconds / 1000;
-        var dataLength = sampleCount * sizeof(short);
+        const int gapSamples = sampleRate * 130 / 1000;
+        var dataLength = (repetitions * sampleCount + (repetitions - 1) * gapSamples) * sizeof(short);
 
         using var stream = new MemoryStream(44 + dataLength);
         using var writer = new BinaryWriter(stream);
@@ -90,21 +162,17 @@ internal sealed class TransitionSoundPlayer
         writer.Write(dataLength);
 
         var fadeSamples = Math.Min(sampleRate / 25, sampleCount / 3);
-        for (var sample = 0; sample < sampleCount; sample++)
+        for (var repetition = 0; repetition < repetitions; repetition++)
         {
-            var envelope = 1d;
-            if (sample < fadeSamples)
+            if (repetition > 0) writer.Write(new byte[gapSamples * sizeof(short)]);
+            for (var sample = 0; sample < sampleCount; sample++)
             {
-                envelope = sample / (double)fadeSamples;
+                var fade = Math.Min(sample, sampleCount - sample - 1);
+                var envelope = Math.Min(1d, fade / (double)fadeSamples);
+                var value = Math.Sin(2 * Math.PI * frequency * sample / sampleRate);
+                var limitedValue = Math.Tanh(volume * value) * 0.98;
+                writer.Write((short)(short.MaxValue * envelope * limitedValue));
             }
-            else if (sample >= sampleCount - fadeSamples)
-            {
-                envelope = (sampleCount - sample - 1) / (double)fadeSamples;
-            }
-
-            var value = Math.Sin(2 * Math.PI * frequency * sample / sampleRate);
-            var limitedValue = Math.Tanh(volume * value) * 0.98;
-            writer.Write((short)(short.MaxValue * envelope * limitedValue));
         }
 
         return stream.ToArray();
