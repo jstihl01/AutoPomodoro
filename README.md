@@ -1,6 +1,8 @@
 # AutoPomodoro para Windows 11
 
-[![Descargar AutoPomodoro para Windows](https://img.shields.io/badge/DESCARGAR-AutoPomodoro%20para%20Windows-1673C9?style=for-the-badge)](https://github.com/jstihl01/AutoPomodoro/releases/download/v2.0.1/AutoPomodoro-Setup-v2.0.1.exe)
+<img src="assets/autopomodoro-icon.png" width="112" alt="Icono de AutoPomodoro">
+
+[![Descargar el instalador de AutoPomodoro para Windows](.github/assets/download-windows.svg)](https://github.com/jstihl01/AutoPomodoro/releases/download/v2.0.1/AutoPomodoro-Setup-v2.0.1.exe)
 
 Temporizador Pomodoro de escritorio sincronizado con la hora local de Windows. Abre la aplicación y el contador se ajusta a la fase que corresponda.
 
