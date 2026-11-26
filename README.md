@@ -4,7 +4,56 @@
 
 Temporizador Pomodoro de escritorio sincronizado con la hora local de Windows. Abre la aplicación y el contador se ajusta a la fase que corresponda.
 
-## Instalar
+[Guía ilustrada](#guía-de-uso) · [Instalar y verificar](#instalar-y-verificar) · [Compilar](#compilar)
+
+## Guía de uso
+
+Las capturas muestran [AutoPomodoro 2.0.2 preliminar](https://github.com/jstihl01/AutoPomodoro/releases/tag/v2.0.2-preview) con horas de ejemplo. El texto de fase del widget y el atajo `F2` están disponibles desde esa versión.
+
+### Lee el contador
+
+Abre **AutoPomodoro** desde el menú Inicio o desde su acceso directo. La fase depende de la hora local. El número indica cuánto queda hasta el siguiente cambio.
+
+| Trabajo 25/5 | Trabajo 50/10 | Descanso |
+| --- | --- | --- |
+| <img src="docs/images/trabajo-25-5.jpg" width="220" alt="Ventana verde en modo 25/5. A las 14:15 quedan 10 minutos de trabajo. En la esquina superior derecha están minimizar y Ajustes."> | <img src="docs/images/trabajo-50-10.jpg" width="220" alt="Ventana roja en modo 50/10. A las 14:15 quedan 35 minutos de trabajo."> | <img src="docs/images/descanso.jpg" width="220" alt="Ventana azul durante el descanso 25/5. A las 14:27 quedan 3 minutos de descanso."> |
+
+- **25/5.** El trabajo comienza a los minutos `:00` y `:30`. El descanso comienza a los minutos `:25` y `:55`.
+- **50/10.** El trabajo comienza a la hora en punto. El descanso comienza al minuto `:50`.
+- Un tono anuncia el descanso y tres tonos anuncian la vuelta al trabajo. Al abrir AutoPomodoro, cambiar de modo o reajustar el reloj, se actualiza en silencio.
+
+Puedes arrastrar el fondo para mover la ventana y sus bordes para cambiar el tamaño. Permanece encima de las ventanas normales.
+
+### Elige el modo y el volumen
+
+Pulsa el **engranaje** de la esquina superior derecha para abrir Ajustes.
+
+<img src="docs/images/ajustes.jpg" width="380" alt="Panel Ajustes con el botón Probar volumen, el deslizador al 60 %, los modos 25/5 y 50/10, Restablecer ajustes y Listo.">
+
+1. Elige **25/5** o **50/10**.
+2. Regula el volumen entre **0 % y 100 %**. Pulsa el altavoz para escuchar una prueba al nivel elegido.
+3. Pulsa **LISTO** o `Esc` para aplicar y guardar los cambios. **Restablecer ajustes** recupera también el tamaño y la posición de la ventana al cerrar el panel.
+
+### Usa el widget en la barra de tareas
+
+Pulsa **minimizar** (el botón a la izquierda del engranaje). El contador pasa a una cápsula junto al área de notificación de la barra principal.
+
+| Contador del widget | Panel de volumen |
+| --- | --- |
+| <img src="docs/images/widget.jpg" width="175" alt="Widget con altavoz a la izquierda, 10:00 restantes y la etiqueta TRABAJO 25/5."> | <img src="docs/images/widget-volumen.jpg" width="212" alt="Panel emergente del widget con el volumen al 60 % y el deslizador enfocado."> |
+
+- Pulsa **el contador** para volver a la ventana principal y abrir Ajustes desde el engranaje. Volver a abrir el acceso directo también recupera la ventana.
+- Pasa el puntero por **el altavoz** para mostrar el volumen. Pulsa el icono para silenciar o volver al último nivel audible.
+- Con el foco en el widget, pulsa `F2` para ir al deslizador y usa las flechas para ajustar el volumen. `Esc` devuelve el foco al altavoz.
+- El widget se oculta con la barra de tareas o ante una ventana a pantalla completa. Si la barra horizontal principal deja de estar disponible, se recupera la ventana y se conserva la vista preferida para el próximo arranque.
+
+### Cierra AutoPomodoro
+
+Pulsa `Alt+F4` con el foco en la ventana o en el widget. También puedes cerrar la ventana desde su icono en la barra de tareas. Mientras AutoPomodoro está abierto, solicita a Windows que mantenga activos el equipo y la pantalla.
+
+Los ajustes se guardan en `%LocalAppData%\AutoPomodoro\settings.json`. Si aparece un aviso de guardado pendiente, vuelve a Ajustes y pulsa **LISTO** para reintentar.
+
+## Instalar y verificar
 
 El botón descarga la versión estable 2.0.1 para Windows 11 x64. El instalador funciona por usuario y crea accesos en el escritorio y en el menú Inicio. Volver a ejecutarlo actualiza la aplicación y conserva los ajustes.
 
@@ -15,25 +64,6 @@ Get-FileHash .\AutoPomodoro-Setup-v2.0.1.exe -Algorithm SHA256
 ```
 
 Desde 2.0.2, la desinstalación retira solo los archivos de ajustes propios de `%LocalAppData%\AutoPomodoro` y elimina la carpeta si queda vacía. La carpeta heredada `%LocalAppData%\Pomodoro` se conserva íntegra. La versión 2.0.1 elimina ambas carpetas completas al desinstalar.
-
-## Funcionamiento
-
-- **25/5**. Trabajo de `:00` a `:25` y de `:30` a `:55`, con fondo verde. Los descansos son azules.
-- **50/10**. Trabajo de `:00` a `:50`, con fondo rojo. Los últimos diez minutos de la hora son de descanso.
-- Un tono suave al comenzar el descanso y tres tonos al volver al trabajo. Se recalcula la fase en silencio al abrir la app, cambiar de modo o cambiar la hora del sistema.
-- La ventana es redimensionable y permanece encima de las ventanas normales. Ciérrala con `Alt+F4` o desde la barra de tareas.
-- En Ajustes se eligen el modo y el volumen. El altavoz reproduce una prueba con el volumen seleccionado. Al pulsar **LISTO** o `Esc`, se aplican y se guardan los cambios. **Restablecer ajustes** devuelve también el tamaño y la posición originales.
-- La app solicita a Windows que mantenga el equipo y la pantalla activos mientras está abierta. Los problemas de audio, energía y guardado se indican en la vista activa.
-
-### Widget en la barra de tareas
-
-- **Mostrar en barra de tareas** sustituye la ventana por una cápsula junto al área de notificación. La cápsula indica la fase por escrito y muestra `25/5` o `50/10` durante el trabajo.
-- Pasa el puntero por el altavoz para abrir el volumen. Púlsalo para silenciar o restaurar el último valor audible. Con el teclado, activa **Mostrar en barra de tareas** desde la ventana y pulsa `F2` en el widget para enfocar el deslizador. `Esc` devuelve el foco al altavoz.
-- Pulsa el contador para recuperar la ventana principal. Allí está el engranaje de **Ajustes**, en la esquina superior derecha. También puedes recuperar la ventana al abrir el acceso directo de nuevo.
-- `Alt+F4` desde el widget cierra AutoPomodoro. El contador y los avisos funcionan en ambas vistas.
-- El widget es una ventana independiente que se coloca sobre la barra horizontal principal. Comparte espacio con sus iconos y se oculta con la barra o ante una ventana a pantalla completa. Si la barra deja de estar disponible, se recupera la ventana principal y se conserva la vista preferida para el próximo arranque.
-
-Los ajustes se guardan en `%LocalAppData%\AutoPomodoro\settings.json`. Si hay una lectura fallida, la app conserva el archivo y busca un respaldo o los ajustes heredados. Tras un fallo de guardado puedes reintentar al pulsar **LISTO** en Ajustes. AutoPomodoro avisa antes de salir si quedan cambios pendientes.
 
 ## Compilar
 
